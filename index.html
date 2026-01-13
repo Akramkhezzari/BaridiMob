@@ -944,7 +944,7 @@
     }
 
     .currency-tab.usd.active {
-      background: linear-gradient(90deg, var(--dollar-blue), var(--dollar-light);
+      background: linear-gradient(90deg, var(--dollar-blue), var(--dollar-light));
       box-shadow: 0 2px 8px rgba(0, 87, 183, 0.2);
     }
 
@@ -1088,29 +1088,13 @@
             </button>
           </div>
           
-          <div class="timer-warning">
-            ⏰ ملاحظة: كل صفقة تحجز الأموال لمدة 20 دقيقة. إذا لم تكتمل خلال هذه المدة، سيتم إلغاؤها تلقائياً.
-          </div>
+          <!-- تم إزالة ملاحظة الوقت -->
         </div>
 
-        <!-- آخر المعاملات -->
-        <div>
-          <div class="wallet-section-title">آخر المعاملات</div>
-          
-          <div class="wallet-tx-list" id="walletTransactionList">
-            <!-- المعاملات ستظهر هنا ديناميكياً -->
-            <div class="wallet-tx">
-              <div class="left">
-                <div class="amt receive">+100 دج</div>
-                <div class="meta">إيداع أولي</div>
-              </div>
-              <div class="right">اليوم</div>
-            </div>
-          </div>
-        </div>
+        <!-- تم إزالة قسم آخر المعاملات -->
 
         <div class="wallet-smallnote">© 2025 — المحفظة الرقمية الجزائرية - سوق التبادل</div>
-        <div class="rate-update" id="rateUpdateTime">آخر تحديث للأسعار: --</div>
+        <!-- تم إزالة آخر تحديث للأسعار -->
       </div>
     </div>
 
@@ -1194,10 +1178,6 @@
           <div class="exchange-info" id="offerCalculation">
             <div class="exchange-rate" id="offerTotal">المبلغ الإجمالي: 0.00 دج</div>
             <div class="exchange-details" id="offerDetails">سيتم حجز: 0.00</div>
-          </div>
-
-          <div class="timer-warning">
-            ⚠️ سيتم حجز الأموال لمدة 20 دقيقة. إذا لم يقبل أحد العرض خلال هذه المدة، سيتم إلغاؤه تلقائياً.
           </div>
 
           <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
@@ -1601,13 +1581,13 @@
             .where('offerType', '==', 'buy')
             .where('status', '==', 'pending')
             .orderBy('createdAt', 'desc')
-            .limit(20);
+            .limit(50);
         } else if (currentMarketView === 'sell') {
           query = db.collection('exchangeOffers')
             .where('offerType', '==', 'sell')
             .where('status', '==', 'pending')
             .orderBy('createdAt', 'desc')
-            .limit(20);
+            .limit(50);
         } else {
           return;
         }
@@ -1791,130 +1771,6 @@
       `;
       
       return tradeElement;
-    }
-
-    /**
-     * تحميل المعاملات الحديثة (مُحسّن)
-     */
-    async function loadRecentTransactions() {
-      try {
-        if (!db || !currentUser.id) {
-          console.error('❌ قاعدة البيانات أو المستخدم غير متاح');
-          return;
-        }
-        
-        console.log('🔍 جاري تحميل المعاملات الحديثة');
-        
-        const transactionsRef = db.collection('transactions')
-          .where('userId', '==', currentUser.id.toString())
-          .orderBy('timestamp', 'desc')
-          .limit(10);
-        
-        const snapshot = await transactionsRef.get();
-        const transactionsList = document.getElementById('walletTransactionList');
-        
-        if (snapshot.empty) {
-          transactionsList.innerHTML = `
-            <div class="wallet-tx">
-              <div class="left">
-                <div class="amt receive" style="color: var(--text-light)">لا توجد معاملات</div>
-                <div class="meta">ابدأ بإجراء أول معاملة</div>
-              </div>
-              <div class="right">-</div>
-            </div>
-          `;
-          return;
-        }
-        
-        transactionsList.innerHTML = '';
-        
-        snapshot.forEach(doc => {
-          const tx = doc.data();
-          const txElement = createTransactionElement(tx);
-          transactionsList.appendChild(txElement);
-        });
-        
-      } catch (error) {
-        console.error('❌ Error loading transactions:', error);
-        document.getElementById('walletTransactionList').innerHTML = `
-          <div class="wallet-tx">
-            <div class="left">
-              <div class="amt receive" style="color: var(--danger)">❌ خطأ في تحميل المعاملات</div>
-              <div class="meta">جاري المحاولة مرة أخرى...</div>
-            </div>
-          </div>
-        `;
-      }
-    }
-
-    /**
-     * إنشاء عنصر معاملة للواجهة
-     */
-    function createTransactionElement(tx) {
-      const txElement = document.createElement('div');
-      txElement.className = 'wallet-tx';
-      
-      let amountText = '';
-      let amountClass = '';
-      let description = '';
-      let timeText = 'الآن';
-      
-      // تنسيق الوقت
-      if (tx.timestamp && tx.timestamp.toDate) {
-        const txDate = tx.timestamp.toDate();
-        const now = new Date();
-        const diffMs = now - txDate;
-        const diffMinutes = Math.floor(diffMs / 60000);
-        const diffHours = Math.floor(diffMinutes / 60);
-        const diffDays = Math.floor(diffHours / 24);
-        
-        if (diffMinutes < 1) {
-          timeText = 'الآن';
-        } else if (diffMinutes < 60) {
-          timeText = `منذ ${diffMinutes} دقيقة`;
-        } else if (diffHours < 24) {
-          timeText = `منذ ${diffHours} ساعة`;
-        } else {
-          timeText = txDate.toLocaleDateString('ar-EG');
-        }
-      }
-      
-      // تنسيق النوع والمبلغ
-      switch (tx.type) {
-        case 'send':
-          amountText = `-${tx.amount} ${tx.currency === 'DZD' ? 'دج' : '$'}`;
-          amountClass = 'send';
-          description = `إرسال إلى ${tx.toUserId || 'مستخدم'}`;
-          break;
-          
-        case 'receive':
-          amountText = `+${tx.amount} ${tx.currency === 'DZD' ? 'دج' : '$'}`;
-          amountClass = 'receive';
-          description = `استلام من ${tx.fromUserId || 'مستخدم'}`;
-          break;
-          
-        case 'exchange':
-          if (tx.fromCurrency && tx.toCurrency) {
-            amountText = `${tx.amount} ${tx.fromCurrency === 'DZD' ? 'دج' : '$'} → ${tx.receivedAmount} ${tx.toCurrency === 'DZD' ? 'دج' : '$'}`;
-            amountClass = tx.fromCurrency === 'USD' ? 'send' : 'receive';
-            description = `تبادل ${tx.fromCurrency} إلى ${tx.toCurrency}`;
-          }
-          break;
-          
-        default:
-          amountText = `${tx.amount || 0} ${tx.currency || ''}`;
-          description = tx.description || 'معاملة';
-      }
-      
-      txElement.innerHTML = `
-        <div class="left">
-          <div class="amt ${amountClass}">${amountText}</div>
-          <div class="meta">${description}</div>
-        </div>
-        <div class="right">${timeText}</div>
-      `;
-      
-      return txElement;
     }
 
     // ========== دوال واجهة المستخدم ==========
@@ -2304,8 +2160,6 @@
         updateWalletsListRealTime();
         updateTotalBalance();
         
-        loadRecentTransactions();
-        
         console.log('✅ Money sent successfully:', { 
           toUserId: targetUserId, 
           currency, 
@@ -2357,7 +2211,6 @@
           updateAllExchangeRates();
           updateWalletsListRealTime();
           updateTotalBalance();
-          updateRateUpdateTime();
           
           console.log('✅ Exchange rates updated:', exchangeRates);
           
@@ -2693,13 +2546,6 @@
       // يتم تحديثها في fetchExchangeRates
     }
 
-    function updateRateUpdateTime() {
-      if (lastRateUpdate) {
-        const timeString = lastRateUpdate.toLocaleTimeString('ar-EG');
-        document.getElementById('rateUpdateTime').textContent = `آخر تحديث للأسعار: ${timeString}`;
-      }
-    }
-
     async function initializeTelegramWebApp() {
       try {
         if (window.Telegram && Telegram.WebApp) {
@@ -2753,7 +2599,6 @@
         
         startSmoothUpdates();
         
-        loadRecentTransactions();
         loadMarketOffers();
         
       } catch (error) {
@@ -3221,7 +3066,6 @@
         // تحديث الواجهة
         updateWalletsListRealTime();
         updateTotalBalance();
-        loadRecentTransactions();
         loadMarketOffers();
         loadMyActiveTrades();
         
