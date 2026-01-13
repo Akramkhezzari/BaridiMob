@@ -15,11 +15,8 @@
   <!-- مكتبة axios لطلبات HTTP -->
   <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
   
-  <!-- إضافة مكتبة لحساب الوقت -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.40/moment-timezone-with-data.min.js"></script>
-  
   <style>
+    /* نفس الـCSS السابق - محفوظ بالكامل */
     * {
       margin: 0;
       padding: 0;
@@ -1035,35 +1032,6 @@
           
           <div class="wallet-wallets" id="walletWalletsList">
             <!-- المحفظة ستظهر هنا ديناميكياً -->
-            <div class="wallet-coin-row">
-              <div class="wallet-coin-left">
-                <div class="wallet-badge">دج</div>
-                <div class="wallet-coin-meta">
-                  <div class="n">الدينار الجزائري</div>
-                  <div class="s">العملة الوطنية</div>
-                  <div class="rate">السعر: جاري التحميل...</div>
-                </div>
-              </div>
-              <div class="wallet-coin-val">
-                <div class="qty price-loading">جاري التحميل...</div>
-                <div class="fiat price-loading">0.00 دج</div>
-              </div>
-            </div>
-            
-            <div class="wallet-coin-row">
-              <div class="wallet-coin-left">
-                <div class="wallet-badge usd">$</div>
-                <div class="wallet-coin-meta">
-                  <div class="n">الدولار الأمريكي</div>
-                  <div class="s">عملة دولية</div>
-                  <div class="rate">السعر: جاري التحميل...</div>
-                </div>
-              </div>
-              <div class="wallet-coin-val">
-                <div class="qty price-loading">جاري التحميل...</div>
-                <div class="fiat price-loading">0.00 $</div>
-              </div>
-            </div>
           </div>
         </div>
 
@@ -1079,7 +1047,6 @@
           
           <div class="exchange-market">
             <div class="market-offers" id="marketOffers">
-              <!-- العروض ستظهر هنا ديناميكياً -->
               <div class="no-offers">جاري تحميل العروض...</div>
             </div>
             
@@ -1087,14 +1054,9 @@
               📝 إنشاء عرض جديد
             </button>
           </div>
-          
-          <!-- تم إزالة ملاحظة الوقت -->
         </div>
 
-        <!-- تم إزالة قسم آخر المعاملات -->
-
         <div class="wallet-smallnote">© 2025 — المحفظة الرقمية الجزائرية - سوق التبادل</div>
-        <!-- تم إزالة آخر تحديث للأسعار -->
       </div>
     </div>
 
@@ -1118,9 +1080,7 @@
           <div class="form-group">
             <label class="form-label">إلى معرف المستخدم</label>
             <input type="text" class="form-input" id="sendToUserId" placeholder="أدخل معرف المستخدم" oninput="searchUser(this.value)">
-            <div id="userSearchResult" class="user-search-result" style="display:none">
-              <!-- نتائج البحث عن المستخدم -->
-            </div>
+            <div id="userSearchResult" class="user-search-result" style="display:none"></div>
           </div>
 
           <div class="form-group">
@@ -1194,17 +1154,13 @@
         <h3>تفاصيل العرض</h3>
         <div style="font-size:13px;color:var(--text-light);margin-bottom:10px" id="offerDetailsTitle"></div>
 
-        <div class="offer-details-full" id="offerFullDetails">
-          <!-- تفاصيل العرض ستظهر هنا -->
-        </div>
+        <div class="offer-details-full" id="offerFullDetails"></div>
 
         <div class="timer-warning" id="offerTimerWarning">
           ⏰ الوقت المتبقي: <span id="offerTimeRemaining">20:00</span>
         </div>
 
-        <div class="offer-actions" id="offerActions">
-          <!-- أزرار القبول والإلغاء ستظهر هنا -->
-        </div>
+        <div class="offer-actions" id="offerActions"></div>
 
         <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
           <button id="walletCloseOfferDetails" class="wallet-ghost-btn" style="padding:8px 12px;font-size:13px">إغلاق</button>
@@ -1220,7 +1176,7 @@
     // ========== الإعدادات الأساسية ==========
     const BOT_TOKEN = "8202620514:AAFWQIDcw_PF45h8LXeM7mvYNjKtcOsQXH0";
     
-    // ========== إعدادات Firebase الجديدة ==========
+    // ========== إعدادات Firebase ==========
     const firebaseConfig = {
       apiKey: "AIzaSyBX8v0qIVjG-Z46fVDeEUDKcPxa_FQF9Qc",
       authDomain: "bnak-belaiba.firebaseapp.com",
@@ -1235,21 +1191,9 @@
     let firebaseApp;
 
     try {
-      // التحقق مما إذا كان Firebase مهيأ مسبقاً
-      if (!firebase.apps || firebase.apps.length === 0) {
-        firebaseApp = firebase.initializeApp(firebaseConfig);
-      } else {
-        firebaseApp = firebase.app();
-      }
-      
+      firebaseApp = firebase.initializeApp(firebaseConfig);
       db = firebase.firestore(firebaseApp);
       console.log('✅ Firebase initialized successfully');
-      
-      // تمكين سجلات التصحيح
-      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-        firebase.firestore.setLogLevel('debug');
-      }
-      
     } catch (error) {
       console.error('❌ Firebase initialization error:', error);
       showToast('❌ خطأ في الاتصال بقاعدة البيانات', 'error');
@@ -1263,7 +1207,7 @@
       username: null
     };
 
-    // معلومات العملات - الدينار الجزائري والدولار
+    // معلومات العملات
     const coinInfo = {
       'DZD': { name: 'الدينار الجزائري', icon: 'دج', color: '#006633, #00cc66' },
       'USD': { name: 'الدولار الأمريكي', icon: '$', color: '#0057b7, #2d87ff' }
@@ -1271,14 +1215,14 @@
 
     // الأرصدة الافتراضية
     const defaultBalances = {
-      'DZD': 10000.00,    // الدينار الجزائري
-      'USD': 100.00       // الدولار الأمريكي
+      'DZD': 10000.00,
+      'USD': 100.00
     };
 
-    // أسعار الصرف (سيتم تحديثها من API)
+    // أسعار الصرف
     let exchangeRates = {
-      'USD_DZD': 134.5,  // 1 دولار = 134.5 دينار (افتراضي)
-      'DZD_USD': 0.0074  // 1 دينار = 0.0074 دولار (افتراضي)
+      'USD_DZD': 134.5,
+      'DZD_USD': 0.0074
     };
 
     // أسعار العملات الحية
@@ -1287,21 +1231,51 @@
     
     // متغيرات التحكم
     let currentSendCurrency = 'DZD';
-    let lastRateUpdate = null;
-    let currentMarketView = 'buy'; // 'buy', 'sell', 'myTrades'
+    let currentMarketView = 'buy';
     let offersListener = null;
     let tradesListener = null;
     let selectedOfferId = null;
 
-    // ========== نظام كتابة الأرصدة في Firebase ==========
+    // ========== دوال المساعدة ==========
+
+    // دالة لتحويل Firebase Timestamp إلى Date
+    function convertFirebaseTimestamp(timestamp) {
+      if (!timestamp) return new Date();
+      if (timestamp.toDate) {
+        return timestamp.toDate();
+      } else if (timestamp.seconds) {
+        return new Date(timestamp.seconds * 1000);
+      } else if (typeof timestamp === 'string' || typeof timestamp === 'number') {
+        return new Date(timestamp);
+      }
+      return new Date();
+    }
+
+    // دالة حساب الوقت المتبقي
+    function calculateTimeRemaining(expiresAt) {
+      const now = new Date();
+      const expiresDate = convertFirebaseTimestamp(expiresAt);
+      const timeRemainingMs = expiresDate - now;
+      
+      if (timeRemainingMs <= 0) return 'منتهي';
+      
+      const minutes = Math.floor(timeRemainingMs / (1000 * 60));
+      const hours = Math.floor(minutes / 60);
+      const remainingMinutes = minutes % 60;
+      
+      if (hours > 0) {
+        return `${hours} ساعة ${remainingMinutes} دقيقة`;
+      }
+      return `${minutes} دقيقة`;
+    }
+
+    // ========== نظام المحفظة في Firebase ==========
 
     /**
-     * إنشاء محفظة جديدة بالأرصدة المحددة
+     * إنشاء محفظة جديدة
      */
     async function createWalletWithBalances(userId) {
       try {
-        console.log('🔧 إنشاء محفظة جديدة للمستخدم:', userId);
-        
         const walletsRef = db.collection('wallets').doc(userId.toString());
         
         const walletData = {
@@ -1324,7 +1298,7 @@
         };
 
         await walletsRef.set(walletData);
-        console.log('✅ تم إنشاء المحفظة بنجاح:', userId);
+        console.log('✅ تم إنشاء المحفظة بنجاح');
         return walletData;
         
       } catch (error) {
@@ -1334,7 +1308,7 @@
     }
 
     /**
-     * تهيئة محفظة المستخدم عند التسجيل الأول
+     * تهيئة محفظة المستخدم
      */
     async function initializeUserWallet(userId) {
       try {
@@ -1342,12 +1316,10 @@
         const walletDoc = await walletsRef.get();
         
         if (!walletDoc.exists) {
-          console.log('🔄 إنشاء محفظة جديدة للمستخدم:', userId);
           const newWallet = await createWalletWithBalances(userId);
           userBalances = newWallet.balances;
           return newWallet;
         } else {
-          console.log('✅ المحفظة موجودة بالفعل:', userId);
           const walletData = walletDoc.data();
           userBalances = walletData.balances || { ...defaultBalances };
           console.log('📊 الأرصدة المحملة:', userBalances);
@@ -1362,7 +1334,7 @@
     }
 
     /**
-     * تحميل أرصدة المستخدم من Firebase
+     * تحميل أرصدة المستخدم
      */
     async function loadUserWallets(userId) {
       try {
@@ -1372,16 +1344,13 @@
         if (walletDoc.exists) {
           const walletData = walletDoc.data();
           userBalances = walletData.balances || { ...defaultBalances };
-          console.log('✅ تم تحميل الأرصدة:', userBalances);
           
-          // تحديث الواجهة
           updateUserInterface(currentUser);
           updateWalletsListRealTime();
           updateTotalBalance();
           
           return walletData;
         } else {
-          console.log('❌ المحفظة غير موجودة، سيتم إنشاؤها');
           return await initializeUserWallet(userId);
         }
         
@@ -1391,237 +1360,75 @@
       }
     }
 
-    // ========== نظام سوق التبادل (المصحح) ==========
+    // ========== نظام سوق التبادل ==========
 
     /**
-     * إنشاء عرض تبادل جديد (مصحح)
-     */
-    async function createExchangeOffer(offerType, amount, rate) {
-      showWalletLoading();
-      
-      // تخزين المتغيرات في حالة الخطأ
-      let giveCurrency, giveAmount;
-      
-      try {
-        console.log('🚀 بدء إنشاء عرض تبادل:', { offerType, amount, rate });
-        
-        // التحقق من صحة البيانات
-        if (!offerType || !amount || !rate) {
-          showToast('❌ يرجى ملء جميع الحقول', 'error');
-          return false;
-        }
-        
-        if (amount <= 0) {
-          showToast('❌ يرجى إدخال مبلغ صحيح', 'error');
-          return false;
-        }
-        
-        if (rate <= 0) {
-          showToast('❌ يرجى إدخال سعر صرف صحيح', 'error');
-          return false;
-        }
-        
-        // تحديد العملات بناءً على نوع العرض
-        let receiveCurrency, receiveAmount;
-        
-        if (offerType === 'buy') {
-          // شراء دولار مقابل دينار
-          giveCurrency = 'DZD';
-          receiveCurrency = 'USD';
-          giveAmount = amount * rate; // الدينار المطلوب
-          receiveAmount = amount; // الدولار المراد شراؤه
-        } else {
-          // بيع دولار مقابل دينار
-          giveCurrency = 'USD';
-          receiveCurrency = 'DZD';
-          giveAmount = amount; // الدولار المراد بيعه
-          receiveAmount = amount * rate; // الدينار المستلم
-        }
-        
-        console.log('🔢 الحسابات:', { giveCurrency, giveAmount, receiveCurrency, receiveAmount });
-        
-        // التحقق من رصيد العملة المقدمة
-        const availableBalance = userBalances[giveCurrency] || 0;
-        console.log('💰 الرصيد المتاح:', availableBalance, 'المطلوب:', giveAmount);
-        
-        if (availableBalance < giveAmount) {
-          const currencyName = giveCurrency === 'DZD' ? 'دينار' : 'دولار';
-          const currencySymbol = giveCurrency === 'DZD' ? 'دج' : '$';
-          showToast(`❌ رصيدك غير كافي. رصيدك: ${formatBalance(availableBalance, giveCurrency)} ${currencySymbol}`, 'error');
-          return false;
-        }
-        
-        // إنشاء العرض في قاعدة البيانات
-        const offersRef = db.collection('exchangeOffers');
-        const offerId = Date.now().toString() + '_' + currentUser.id;
-        const expiresAt = new Date(Date.now() + 20 * 60 * 1000); // 20 دقيقة من الآن
-        
-        const offerData = {
-          offerId: offerId,
-          creatorId: currentUser.id.toString(),
-          creatorName: currentUser.firstName || 'مستخدم',
-          offerType: offerType, // 'buy' or 'sell'
-          giveCurrency: giveCurrency,
-          giveAmount: giveAmount,
-          receiveCurrency: receiveCurrency,
-          receiveAmount: receiveAmount,
-          rate: rate,
-          amount: amount,
-          status: 'pending', // pending, reserved, completed, cancelled, expired
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          expiresAt: expiresAt,
-          reservedAmount: giveAmount,
-          reservedCurrency: giveCurrency
-        };
-        
-        console.log('💾 حفظ العرض في قاعدة البيانات:', offerData);
-        
-        // حفظ العرض في Firebase
-        await offersRef.doc(offerId).set(offerData);
-        console.log('✅ تم حفظ العرض في قاعدة البيانات');
-        
-        // تحديث محفظة المستخدم في Firebase
-        const walletsRef = db.collection('wallets').doc(currentUser.id.toString());
-        await walletsRef.update({
-          [`balances.${giveCurrency}`]: firebase.firestore.FieldValue.increment(-giveAmount),
-          [`reservedBalances.${giveCurrency}`]: firebase.firestore.FieldValue.increment(giveAmount),
-          'updatedAt': firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        console.log('✅ تم تحديث المحفظة في قاعدة البيانات');
-        
-        // إنشاء صفقة مرتبطة
-        const tradesRef = db.collection('exchangeTrades');
-        const tradeId = offerId + '_creator';
-        
-        const tradeData = {
-          tradeId: tradeId,
-          offerId: offerId,
-          userId: currentUser.id.toString(),
-          userName: currentUser.firstName || 'مستخدم',
-          role: 'creator', // creator or acceptor
-          status: 'waiting', // waiting, confirmed, completed, cancelled
-          giveAmount: giveAmount,
-          giveCurrency: giveCurrency,
-          receiveAmount: receiveAmount,
-          receiveCurrency: receiveCurrency,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          expiresAt: expiresAt
-        };
-        
-        await tradesRef.doc(tradeId).set(tradeData);
-        console.log('✅ تم إنشاء صفقة للمنشئ');
-        
-        // تحديث البيانات المحلية
-        userBalances[giveCurrency] = availableBalance - giveAmount;
-        updateLocalUserData();
-        
-        // إظهار رسالة النجاح
-        showToast(`✅ تم إنشاء العرض بنجاح! المبلغ محجوز لمدة 20 دقيقة`, 'success');
-        
-        // إغلاق النافذة
-        closeCreateOfferModal();
-        
-        // تحديث الواجهة
-        updateWalletsListRealTime();
-        updateTotalBalance();
-        
-        // إعادة تحميل العروض
-        setTimeout(() => {
-          loadMarketOffers();
-          loadMyActiveTrades();
-        }, 1000);
-        
-        console.log('🎉 تم إنشاء العرض بنجاح!');
-        
-        return true;
-        
-      } catch (error) {
-        console.error('❌ Error creating exchange offer:', error);
-        
-        // استعادة الرصيد في حالة الخطأ
-        if (giveCurrency && giveAmount && userBalances) {
-          userBalances[giveCurrency] = (userBalances[giveCurrency] || 0) + giveAmount;
-          updateWalletsListRealTime();
-          updateTotalBalance();
-        }
-        
-        showToast('❌ حدث خطأ أثناء إنشاء العرض: ' + error.message, 'error');
-        return false;
-      } finally {
-        hideWalletLoading();
-      }
-    }
-
-    /**
-     * تحميل عروض السوق (مصحح)
+     * تحميل عروض السوق - الإصدار المصحح
      */
     async function loadMarketOffers() {
       try {
         if (!db) {
-          console.error('❌ قاعدة البيانات غير متاحة');
           document.getElementById('marketOffers').innerHTML = '<div class="no-offers">❌ قاعدة البيانات غير متاحة</div>';
           return;
         }
-        
-        console.log('🔍 جاري تحميل العروض من السوق:', currentMarketView);
-        
-        // إيقاف المستمع السابق إذا كان موجوداً
+
+        // إيقاف المستمع السابق
         if (offersListener) {
           offersListener();
         }
-        
+
         const marketOffersElement = document.getElementById('marketOffers');
         marketOffersElement.innerHTML = '<div class="no-offers">جاري تحميل العروض...</div>';
-        
-        // جلب العروض بناءً على نوع العرض المحدد
+
+        // استخدام استعلام أبسط بدون where مركب
         let query;
         if (currentMarketView === 'buy') {
           query = db.collection('exchangeOffers')
             .where('offerType', '==', 'buy')
-            .where('status', '==', 'pending')
-            .orderBy('createdAt', 'desc')
-            .limit(50);
-        } else if (currentMarketView === 'sell') {
+            .where('status', '==', 'pending');
+        } else {
           query = db.collection('exchangeOffers')
             .where('offerType', '==', 'sell')
-            .where('status', '==', 'pending')
-            .orderBy('createdAt', 'desc')
-            .limit(50);
-        } else {
+            .where('status', '==', 'pending');
+        }
+
+        // الحصول على البيانات مرة واحدة بدلاً من onSnapshot للتجربة
+        const querySnapshot = await query.get();
+        
+        if (querySnapshot.empty) {
+          marketOffersElement.innerHTML = '<div class="no-offers">لا توجد عروض حالياً</div>';
           return;
         }
+
+        marketOffersElement.innerHTML = '';
         
-        // إضافة مستمع للتحديثات في الوقت الحقيقي
-        offersListener = query.onSnapshot(snapshot => {
-          console.log('📊 تم تحديث العروض، عدد العروض:', snapshot.size);
-          
-          if (snapshot.empty) {
-            marketOffersElement.innerHTML = '<div class="no-offers">لا توجد عروض حالياً</div>';
-            return;
-          }
-          
-          marketOffersElement.innerHTML = '';
-          
-          snapshot.forEach(doc => {
-            const offer = doc.data();
-            console.log('📄 عرض:', offer.offerId);
-            
-            // التحقق من صحة البيانات
-            if (!offer.offerId || !offer.creatorId) {
-              console.warn('⚠️ عرض به بيانات ناقصة:', offer);
-              return;
-            }
-            
+        const offers = [];
+        querySnapshot.forEach(doc => {
+          const offer = doc.data();
+          offer.id = doc.id;
+          offers.push(offer);
+        });
+
+        // ترتيب العروض حسب التاريخ (الأحدث أولاً)
+        offers.sort((a, b) => {
+          const dateA = convertFirebaseTimestamp(a.createdAt);
+          const dateB = convertFirebaseTimestamp(b.createdAt);
+          return dateB - dateA;
+        });
+
+        // عرض العروض
+        offers.forEach(offer => {
+          if (offer.creatorId && offer.creatorId.toString() !== currentUser.id.toString()) {
             const offerElement = createOfferElement(offer);
             marketOffersElement.appendChild(offerElement);
-          });
-          
-        }, error => {
-          console.error('❌ Error loading market offers:', error);
-          marketOffersElement.innerHTML = '<div class="no-offers">خطأ في تحميل العروض</div>';
+          }
         });
-        
+
+        // إذا لم يكن هناك عروض للمستخدم الحالي
+        if (marketOffersElement.children.length === 0) {
+          marketOffersElement.innerHTML = '<div class="no-offers">لا توجد عروض حالياً</div>';
+        }
+
       } catch (error) {
         console.error('❌ Error loading market offers:', error);
         document.getElementById('marketOffers').innerHTML = '<div class="no-offers">❌ خطأ في تحميل العروض</div>';
@@ -1629,27 +1436,22 @@
     }
 
     /**
-     * إنشاء عنصر عرض للواجهة (مُحسّن)
+     * إنشاء عنصر عرض للواجهة - الإصدار المصحح
      */
     function createOfferElement(offer) {
       const offerElement = document.createElement('div');
       offerElement.className = `market-offer ${offer.offerType}`;
       
       const offerTypeText = offer.offerType === 'buy' ? 'شراء' : 'بيع';
-      const giveCurrencySymbol = offer.giveCurrency === 'DZD' ? 'دج' : '$';
-      const receiveCurrencySymbol = offer.receiveCurrency === 'DZD' ? 'دج' : '$';
+      const timeRemaining = calculateTimeRemaining(offer.expiresAt);
       
-      // حساب الوقت المتبقي
-      const expiresAt = offer.expiresAt?.toDate ? offer.expiresAt.toDate() : new Date(offer.expiresAt);
-      const now = new Date();
-      const timeRemainingMs = Math.max(0, expiresAt - now);
-      const timeRemainingMinutes = Math.floor(timeRemainingMs / 60000);
-      
-      // تنسيق المبلغ
-      const displayAmount = offer.offerType === 'buy' ? 
-        `${offer.amount} $ → ${offer.giveAmount.toFixed(2)} دج` : 
-        `${offer.amount} $ → ${offer.receiveAmount.toFixed(2)} دج`;
-      
+      let displayAmount = '';
+      if (offer.offerType === 'buy') {
+        displayAmount = `${offer.amount || 0} $ → ${(offer.giveAmount || 0).toFixed(2)} دج`;
+      } else {
+        displayAmount = `${offer.amount || 0} $ → ${(offer.receiveAmount || 0).toFixed(2)} دج`;
+      }
+
       offerElement.innerHTML = `
         <div class="offer-header">
           <div class="offer-type ${offer.offerType}">${offerTypeText}</div>
@@ -1657,23 +1459,20 @@
         </div>
         <div class="offer-details">
           <div class="offer-amount">${displayAmount}</div>
-          <div class="offer-rate">السعر: ${offer.rate} دج/$</div>
+          <div class="offer-rate">السعر: ${offer.rate || 0} دج/$</div>
         </div>
         <div class="offer-footer">
-          <div class="offer-timer">⏰ ${timeRemainingMinutes} دقيقة</div>
+          <div class="offer-timer">⏰ ${timeRemaining}</div>
           <div class="offer-status status-pending">في انتظار القبول</div>
         </div>
-        ${offer.creatorId !== currentUser.id.toString() ? `
         <div class="offer-actions">
-          <button class="offer-action-btn accept-btn" onclick="event.stopPropagation(); viewOfferDetails('${offer.offerId}')">عرض التفاصيل</button>
+          <button class="offer-action-btn accept-btn" onclick="event.stopPropagation(); viewOfferDetails('${offer.id || offer.offerId}')">عرض التفاصيل</button>
         </div>
-        ` : ''}
       `;
       
-      // إضافة حدث النقر على العرض
       offerElement.addEventListener('click', function(e) {
         if (!e.target.closest('.offer-action-btn')) {
-          viewOfferDetails(offer.offerId);
+          viewOfferDetails(offer.id || offer.offerId);
         }
       });
       
@@ -1681,88 +1480,101 @@
     }
 
     /**
-     * تحميل صفقاتي النشطة
+     * تحميل صفقاتي النشطة - الإصدار المصحح
      */
     async function loadMyActiveTrades() {
       try {
-        if (!db || !currentUser.id) return;
-        
-        // إيقاف المستمع السابق إذا كان موجوداً
+        if (!db || !currentUser.id) {
+          document.getElementById('marketOffers').innerHTML = '<div class="no-offers">❌ قاعدة البيانات غير متاحة</div>';
+          return;
+        }
+
+        // إيقاف المستمع السابق
         if (tradesListener) {
           tradesListener();
         }
-        
-        const tradesQuery = db.collection('exchangeTrades')
+
+        const marketOffersElement = document.getElementById('marketOffers');
+        marketOffersElement.innerHTML = '<div class="no-offers">جاري تحميل الصفقات...</div>';
+
+        // الحصول على الصفقات الخاصة بالمستخدم
+        const tradesQuery = await db.collection('exchangeTrades')
           .where('userId', '==', currentUser.id.toString())
-          .where('status', 'in', ['waiting', 'confirmed'])
-          .orderBy('createdAt', 'desc')
-          .limit(10);
+          .get();
+
+        if (tradesQuery.empty) {
+          marketOffersElement.innerHTML = '<div class="no-offers">لا توجد صفقات نشطة</div>';
+          return;
+        }
+
+        marketOffersElement.innerHTML = '';
         
-        tradesListener = tradesQuery.onSnapshot(snapshot => {
-          if (currentMarketView === 'myTrades') {
-            const marketOffersElement = document.getElementById('marketOffers');
-            
-            if (snapshot.empty) {
-              marketOffersElement.innerHTML = '<div class="no-offers">لا توجد صفقات نشطة</div>';
-              return;
-            }
-            
-            marketOffersElement.innerHTML = '';
-            
-            snapshot.forEach(async tradeDoc => {
-              const trade = tradeDoc.data();
-              const offerDoc = await db.collection('exchangeOffers').doc(trade.offerId).get();
-              
-              if (offerDoc.exists) {
-                const offer = offerDoc.data();
-                const tradeElement = createTradeElement(trade, offer);
-                marketOffersElement.appendChild(tradeElement);
-              }
-            });
-          }
-        }, error => {
-          console.error('❌ Error loading active trades:', error);
+        const trades = [];
+        tradesQuery.forEach(doc => {
+          const trade = doc.data();
+          trade.id = doc.id;
+          trades.push(trade);
         });
-        
+
+        // تصفية الصفقات النشطة فقط
+        const activeTrades = trades.filter(trade => 
+          trade.status === 'waiting' || trade.status === 'confirmed'
+        );
+
+        if (activeTrades.length === 0) {
+          marketOffersElement.innerHTML = '<div class="no-offers">لا توجد صفقات نشطة</div>';
+          return;
+        }
+
+        // جلب بيانات العروض المرتبطة
+        for (const trade of activeTrades) {
+          let offerData = null;
+          if (trade.offerId) {
+            const offerDoc = await db.collection('exchangeOffers').doc(trade.offerId).get();
+            if (offerDoc.exists) {
+              offerData = offerDoc.data();
+            }
+          }
+          
+          const tradeElement = createTradeElement(trade, offerData);
+          marketOffersElement.appendChild(tradeElement);
+        }
+
       } catch (error) {
         console.error('❌ Error loading active trades:', error);
+        document.getElementById('marketOffers').innerHTML = '<div class="no-offers">❌ خطأ في تحميل الصفقات</div>';
       }
     }
 
     /**
-     * إنشاء عنصر صفقة للواجهة
+     * إنشاء عنصر صفقة - الإصدار المصحح
      */
     function createTradeElement(trade, offer) {
       const tradeElement = document.createElement('div');
       tradeElement.className = `market-offer ${trade.role === 'creator' ? 'sell' : 'buy'}`;
       
       const roleText = trade.role === 'creator' ? 'منشئ العرض' : 'قابل العرض';
-      const partnerText = trade.partnerId ? `مع المستخدم: ${trade.partnerId}` : 'في انتظار القبول';
+      const timeRemaining = calculateTimeRemaining(trade.expiresAt);
       
-      // حساب الوقت المتبقي
-      const expiresAt = trade.expiresAt?.toDate ? trade.expiresAt.toDate() : new Date(trade.expiresAt);
-      const now = new Date();
-      const timeRemaining = Math.max(0, Math.floor((expiresAt - now) / 60000)); // بالدقائق
-      
-      const statusText = trade.status === 'waiting' ? 'في انتظار التأكيد' : 'مؤكدة - في انتظار الطرف الآخر';
+      const statusText = trade.status === 'waiting' ? 'في انتظار التأكيد' : 'مؤكدة';
       const statusClass = trade.status === 'waiting' ? 'status-pending' : 'status-reserved';
-      
+
       tradeElement.innerHTML = `
         <div class="offer-header">
           <div class="offer-type ${trade.role === 'creator' ? 'sell' : 'buy'}">${roleText}</div>
-          <div class="offer-user">${partnerText}</div>
+          <div class="offer-user">مع: ${trade.partnerId || 'مستخدم آخر'}</div>
         </div>
         <div class="offer-details">
-          <div class="offer-amount">أعطي: ${trade.giveAmount} ${trade.giveCurrency === 'DZD' ? 'دج' : '$'}</div>
-          <div class="offer-amount">أستلم: ${trade.receiveAmount} ${trade.receiveCurrency === 'DZD' ? 'دج' : '$'}</div>
+          <div class="offer-amount">أعطي: ${trade.giveAmount || 0} ${trade.giveCurrency === 'DZD' ? 'دج' : '$'}</div>
+          <div class="offer-amount">أستلم: ${trade.receiveAmount || 0} ${trade.receiveCurrency === 'DZD' ? 'دج' : '$'}</div>
         </div>
         <div class="offer-footer">
-          <div class="offer-timer">⏰ ${timeRemaining} دقيقة</div>
+          <div class="offer-timer">⏰ ${timeRemaining}</div>
           <div class="offer-status ${statusClass}">${statusText}</div>
         </div>
         ${trade.status === 'waiting' ? `
         <div class="offer-actions">
-          <button class="offer-action-btn accept-btn" onclick="confirmTrade('${trade.tradeId}')">تأكيد الصفقة</button>
+          <button class="offer-action-btn accept-btn" onclick="confirmTrade('${trade.id || trade.tradeId}')">تأكيد الصفقة</button>
           ${trade.role === 'creator' ? `
           <button class="offer-action-btn cancel-btn" onclick="cancelExchangeOffer('${trade.offerId}')">إلغاء العرض</button>
           ` : ''}
@@ -1785,16 +1597,13 @@
       
       if (type === 'buy') {
         document.querySelector('.market-tab:nth-child(1)').classList.add('active');
+        loadMarketOffers();
       } else if (type === 'sell') {
         document.querySelector('.market-tab:nth-child(2)').classList.add('active');
+        loadMarketOffers();
       } else {
         document.querySelector('.market-tab:nth-child(3)').classList.add('active');
-      }
-      
-      if (type === 'myTrades') {
         loadMyActiveTrades();
-      } else {
-        loadMarketOffers();
       }
     }
 
@@ -1809,10 +1618,10 @@
       document.getElementById('offerRate').value = exchangeRates.USD_DZD;
     }
 
-    function viewOfferDetails(offerId) {
+    async function viewOfferDetails(offerId) {
       selectedOfferId = offerId;
       document.getElementById('walletOfferDetailsModal').classList.add('open');
-      loadOfferDetails(offerId);
+      await loadOfferDetails(offerId);
     }
 
     function closeOfferDetailsModal() {
@@ -1824,7 +1633,6 @@
       const offerType = document.getElementById('offerType').value;
       const amountLabel = document.getElementById('offerAmountLabel');
       const balanceInfo = document.getElementById('offerBalanceInfo');
-      const marketRate = document.getElementById('currentMarketRate');
       
       if (offerType === 'buy') {
         amountLabel.textContent = 'المبلغ المراد شراؤه ($)';
@@ -1834,7 +1642,7 @@
         balanceInfo.textContent = `الرصيد المتاح: ${formatBalance(userBalances.USD || 0, 'USD')} $`;
       }
       
-      marketRate.textContent = exchangeRates.USD_DZD;
+      document.getElementById('currentMarketRate').textContent = exchangeRates.USD_DZD;
       document.getElementById('offerRate').value = exchangeRates.USD_DZD;
       
       calculateOfferTotal();
@@ -1883,15 +1691,10 @@
         const timerElement = document.getElementById('offerTimeRemaining');
         
         // حساب الوقت المتبقي
-        const expiresAt = offer.expiresAt?.toDate ? offer.expiresAt.toDate() : new Date(offer.expiresAt);
-        const now = new Date();
-        const timeRemaining = Math.max(0, Math.floor((expiresAt - now) / 60000)); // بالدقائق
-        timerElement.textContent = `${timeRemaining} دقيقة`;
+        const timeRemaining = calculateTimeRemaining(offer.expiresAt);
+        timerElement.textContent = timeRemaining;
         
         const offerTypeText = offer.offerType === 'buy' ? 'شراء' : 'بيع';
-        const giveCurrencySymbol = offer.giveCurrency === 'DZD' ? 'دج' : '$';
-        const receiveCurrencySymbol = offer.receiveCurrency === 'DZD' ? 'دج' : '$';
-        
         titleElement.textContent = `عرض ${offerTypeText} دولار مقابل دينار`;
         
         let detailsHTML = '';
@@ -1904,22 +1707,16 @@
               <div style="background: var(--bg-lighter); padding: 10px; border-radius: 8px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                   <span>المستخدم يريد شراء:</span>
-                  <span style="font-weight: 700; color: var(--buy-color)">${offer.amount} $</span>
+                  <span style="font-weight: 700; color: var(--buy-color)">${offer.amount || 0} $</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                   <span>بدفع مبلغ:</span>
-                  <span style="font-weight: 700;">${offer.giveAmount.toFixed(2)} دج</span>
+                  <span style="font-weight: 700;">${(offer.giveAmount || 0).toFixed(2)} دج</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                   <span>سعر الصرف:</span>
-                  <span style="font-weight: 700;">${offer.rate} دج/$</span>
+                  <span style="font-weight: 700;">${offer.rate || 0} دج/$</span>
                 </div>
-              </div>
-            </div>
-            <div style="font-size: 13px; color: var(--text-gray);">
-              <div>📝 وصف العرض:</div>
-              <div style="background: white; padding: 10px; border-radius: 8px; margin-top: 5px; border: 1px solid var(--border-light);">
-                المستخدم ${offer.creatorName || offer.creatorId} يريد شراء ${offer.amount} دولار مقابل ${offer.giveAmount.toFixed(2)} دينار جزائري.
               </div>
             </div>
           `;
@@ -1930,22 +1727,16 @@
               <div style="background: var(--bg-lighter); padding: 10px; border-radius: 8px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                   <span>المستخدم يريد بيع:</span>
-                  <span style="font-weight: 700; color: var(--sell-color)">${offer.amount} $</span>
+                  <span style="font-weight: 700; color: var(--sell-color)">${offer.amount || 0} $</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
                   <span>ويستلم مبلغ:</span>
-                  <span style="font-weight: 700;">${offer.receiveAmount.toFixed(2)} دج</span>
+                  <span style="font-weight: 700;">${(offer.receiveAmount || 0).toFixed(2)} دج</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
                   <span>سعر الصرف:</span>
-                  <span style="font-weight: 700;">${offer.rate} دج/$</span>
+                  <span style="font-weight: 700;">${offer.rate || 0} دج/$</span>
                 </div>
-              </div>
-            </div>
-            <div style="font-size: 13px; color: var(--text-gray);">
-              <div>📝 وصف العرض:</div>
-              <div style="background: white; padding: 10px; border-radius: 8px; margin-top: 5px; border: 1px solid var(--border-light);">
-                المستخدم ${offer.creatorName || offer.creatorId} يريد بيع ${offer.amount} دولار مقابل ${offer.receiveAmount.toFixed(2)} دينار جزائري.
               </div>
             </div>
           `;
@@ -1953,9 +1744,8 @@
         
         detailsElement.innerHTML = detailsHTML;
         
-        // تحديد الأزرار بناءً على حالة العرض والمستخدم
+        // تحديد الأزرار
         if (offer.creatorId === currentUser.id.toString()) {
-          // المستخدم هو منشئ العرض
           if (offer.status === 'pending') {
             actionsHTML = `
               <button class="offer-action-btn cancel-btn" onclick="cancelExchangeOffer('${offerId}')">إلغاء العرض</button>
@@ -1963,13 +1753,11 @@
           } else if (offer.status === 'reserved') {
             actionsHTML = `
               <div style="text-align: center; padding: 10px; background: rgba(41, 128, 185, 0.1); border-radius: 8px; color: #2980b9; font-size: 13px;">
-                ✓ تم قبول العرض من قبل مستخدم آخر<br>
-                في انتظار تأكيد الطرفين
+                ✓ تم قبول العرض من قبل مستخدم آخر
               </div>
             `;
           }
         } else {
-          // المستخدم ليس منشئ العرض
           if (offer.status === 'pending') {
             actionsHTML = `
               <button class="offer-action-btn accept-btn" onclick="acceptExchangeOffer('${offerId}')">قبول العرض</button>
@@ -2003,11 +1791,8 @@
         };
 
         updateUserInterface(currentUser);
-        
         await fetchExchangeRates();
-        
         await initializeUserWallet(userData.id);
-        
         await loadUserWallets(userData.id);
         
       } catch (error) {
@@ -2017,8 +1802,6 @@
     }
 
     function startSmoothUpdates() {
-      console.log('🔄 Starting smooth updates');
-      
       setInterval(async () => {
         await fetchExchangeRates();
       }, 60000);
@@ -2026,7 +1809,7 @@
       setInterval(async () => {
         await refreshUserBalancesQuietly();
         await checkExpiredOffers();
-      }, 30000); // كل 30 ثانية للتحقق من العروض المنتهية
+      }, 30000);
       
       fetchExchangeRates();
     }
@@ -2150,7 +1933,6 @@
         await batch.commit();
         
         userBalances[currency] = senderBalance - amount;
-        
         updateLocalUserData();
         
         const currencySymbol = currency === 'DZD' ? 'دينار جزائري' : 'دولار';
@@ -2159,12 +1941,6 @@
         
         updateWalletsListRealTime();
         updateTotalBalance();
-        
-        console.log('✅ Money sent successfully:', { 
-          toUserId: targetUserId, 
-          currency, 
-          amount
-        });
         
         return true;
         
@@ -2181,19 +1957,17 @@
       try {
         showPriceLoading();
         
+        // استخدام API أكثر موثوقية
         const response = await axios.get('https://api.exchangerate-api.com/v4/latest/USD');
         
         if (response.data && response.data.rates) {
           const rates = response.data.rates;
-          
           const usdToDzd = rates.DZD || 134.5;
           
           exchangeRates = {
             'USD_DZD': usdToDzd,
             'DZD_USD': 1 / usdToDzd
           };
-          
-          lastRateUpdate = new Date();
           
           livePrices = {
             'DZD': { 
@@ -2212,8 +1986,6 @@
           updateWalletsListRealTime();
           updateTotalBalance();
           
-          console.log('✅ Exchange rates updated:', exchangeRates);
-          
         } else {
           throw new Error('Invalid API response');
         }
@@ -2223,6 +1995,7 @@
       } catch (error) {
         console.error('❌ Error fetching exchange rates:', error);
         
+        // استخدام القيم الافتراضية في حالة الخطأ
         exchangeRates = {
           'USD_DZD': 134.5,
           'DZD_USD': 0.0074
@@ -2256,58 +2029,39 @@
         const now = new Date();
         const expiredOffersQuery = await db.collection('exchangeOffers')
           .where('status', 'in', ['pending', 'reserved'])
-          .where('expiresAt', '<', now)
           .get();
         
-        if (expiredOffersQuery.empty) return;
-        
         const batch = db.batch();
+        let hasUpdates = false;
         
-        expiredOffersQuery.forEach(async offerDoc => {
-          const offer = offerDoc.data();
-          const offerRef = offerDoc.ref;
+        expiredOffersQuery.forEach(doc => {
+          const offer = doc.data();
+          const expiresAt = convertFirebaseTimestamp(offer.expiresAt);
           
-          // تحديث حالة العرض إلى منتهي
-          batch.update(offerRef, {
-            status: 'expired',
-            expiredAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
-          
-          // تحرير المبلغ المحجوز للمنشئ
-          if (offer.creatorId) {
-            const creatorWalletsRef = db.collection('wallets').doc(offer.creatorId);
-            batch.update(creatorWalletsRef, {
-              [`balances.${offer.giveCurrency}`]: firebase.firestore.FieldValue.increment(offer.giveAmount),
-              [`reservedBalances.${offer.giveCurrency}`]: firebase.firestore.FieldValue.increment(-offer.giveAmount),
-              'updatedAt': firebase.firestore.FieldValue.serverTimestamp()
-            });
-          }
-          
-          // تحرير المبلغ المحجوز للقابل إذا كان موجوداً
-          if (offer.acceptorId) {
-            const acceptorWalletsRef = db.collection('wallets').doc(offer.acceptorId);
-            batch.update(acceptorWalletsRef, {
-              [`balances.${offer.receiveCurrency}`]: firebase.firestore.FieldValue.increment(offer.receiveAmount),
-              [`reservedBalances.${offer.receiveCurrency}`]: firebase.firestore.FieldValue.increment(-offer.receiveAmount),
-              'updatedAt': firebase.firestore.FieldValue.serverTimestamp()
-            });
-          }
-          
-          // تحديث حالة الصفقات المرتبطة
-          const tradesQuery = await db.collection('exchangeTrades')
-            .where('offerId', '==', offer.offerId)
-            .get();
-          
-          tradesQuery.forEach(tradeDoc => {
-            batch.update(tradeDoc.ref, {
+          if (expiresAt < now) {
+            hasUpdates = true;
+            const offerRef = doc.ref;
+            
+            batch.update(offerRef, {
               status: 'expired',
               expiredAt: firebase.firestore.FieldValue.serverTimestamp()
             });
-          });
+            
+            if (offer.creatorId) {
+              const creatorWalletsRef = db.collection('wallets').doc(offer.creatorId);
+              batch.update(creatorWalletsRef, {
+                [`balances.${offer.giveCurrency}`]: firebase.firestore.FieldValue.increment(offer.giveAmount),
+                [`reservedBalances.${offer.giveCurrency}`]: firebase.firestore.FieldValue.increment(-offer.giveAmount),
+                'updatedAt': firebase.firestore.FieldValue.serverTimestamp()
+              });
+            }
+          }
         });
         
-        await batch.commit();
-        console.log('✅ Expired offers processed');
+        if (hasUpdates) {
+          await batch.commit();
+          console.log('✅ Expired offers processed');
+        }
         
       } catch (error) {
         console.error('❌ Error checking expired offers:', error);
@@ -2387,8 +2141,6 @@
 
     function updateUserInterface(userData) {
       try {
-        console.log('👤 تحديث واجهة المستخدم:', userData);
-        
         const userName = userData.first_name || userData.firstName || 'مستخدم';
         const userLastName = userData.last_name || userData.lastName || '';
         const fullName = userName + (userLastName ? ' ' + userLastName : '');
@@ -2396,10 +2148,7 @@
         document.getElementById('walletUserName').textContent = fullName;
         document.getElementById('walletUserId').textContent = `id: ${userData.id}`;
         document.getElementById('walletUserId').setAttribute('onclick', `copyUserId(${userData.id})`);
-        
         document.getElementById('walletCoinIcon').textContent = '💰';
-        
-        console.log('✅ تم تحديث واجهة المستخدم:', fullName, userData.id);
         
         setTimeout(() => {
           document.getElementById('telegramStatus').style.display = 'none';
@@ -2460,10 +2209,7 @@
         const balance = userBalances[symbol] || 0;
         const liveData = livePrices[symbol];
         
-        if (!liveData) {
-          console.log('❌ لا توجد بيانات سعر لـ:', symbol);
-          return;
-        }
+        if (!liveData) return;
         
         let otherValue = '';
         let rateText = '';
@@ -2524,11 +2270,9 @@
       if (changePercentage >= 0) {
         trendElement.textContent = `+${changePercentage.toFixed(1)}%`;
         trendElement.className = 'wallet-bal-trend';
-        trendElement.style.color = 'var(--success)';
       } else {
         trendElement.textContent = `${changePercentage.toFixed(1)}%`;
         trendElement.className = 'wallet-bal-trend negative';
-        trendElement.style.color = 'var(--danger)';
       }
     }
 
@@ -2561,7 +2305,6 @@
             document.getElementById('telegramStatus').style.display = 'block';
             
             updateUserInterface(user);
-            
             await initializeUserSystem(user);
             
           } else {
@@ -2583,22 +2326,17 @@
       showWalletLoading();
       
       try {
-        console.log('🚀 بدء تهيئة نظام المستخدم:', userData.id);
-        
         const connectionSuccess = await testFirebaseConnection();
         
         if (connectionSuccess) {
-          console.log('✅ استخدام Firebase لنظام المستخدم');
           await setupSimpleUserSystem(userData);
           updateFirebaseStatus(true);
         } else {
-          console.log('🔄 استخدام التخزين المحلي لنظام المستخدم');
           await setupLocalUserSystem(userData);
           updateFirebaseStatus(false);
         }
         
         startSmoothUpdates();
-        
         loadMarketOffers();
         
       } catch (error) {
@@ -2702,11 +2440,134 @@
 
     // ========== دوال إضافية للمعالجة ==========
 
+    async function createExchangeOffer(offerType, amount, rate) {
+      showWalletLoading();
+      
+      try {
+        if (!offerType || !amount || !rate) {
+          showToast('❌ يرجى ملء جميع الحقول', 'error');
+          return false;
+        }
+        
+        if (amount <= 0) {
+          showToast('❌ يرجى إدخال مبلغ صحيح', 'error');
+          return false;
+        }
+        
+        if (rate <= 0) {
+          showToast('❌ يرجى إدخال سعر صرف صحيح', 'error');
+          return false;
+        }
+        
+        // تحديد العملات والمبالغ
+        let giveCurrency, giveAmount, receiveCurrency, receiveAmount;
+        
+        if (offerType === 'buy') {
+          giveCurrency = 'DZD';
+          receiveCurrency = 'USD';
+          giveAmount = amount * rate;
+          receiveAmount = amount;
+        } else {
+          giveCurrency = 'USD';
+          receiveCurrency = 'DZD';
+          giveAmount = amount;
+          receiveAmount = amount * rate;
+        }
+        
+        // التحقق من الرصيد
+        const availableBalance = userBalances[giveCurrency] || 0;
+        
+        if (availableBalance < giveAmount) {
+          const currencyName = giveCurrency === 'DZD' ? 'دينار' : 'دولار';
+          const currencySymbol = giveCurrency === 'DZD' ? 'دج' : '$';
+          showToast(`❌ رصيدك غير كافي. رصيدك: ${formatBalance(availableBalance, giveCurrency)} ${currencySymbol}`, 'error');
+          return false;
+        }
+        
+        // إنشاء العرض
+        const offersRef = db.collection('exchangeOffers');
+        const offerId = Date.now().toString() + '_' + currentUser.id;
+        const expiresAt = new Date(Date.now() + 20 * 60 * 1000);
+        
+        const offerData = {
+          offerId: offerId,
+          creatorId: currentUser.id.toString(),
+          creatorName: currentUser.firstName || 'مستخدم',
+          offerType: offerType,
+          giveCurrency: giveCurrency,
+          giveAmount: giveAmount,
+          receiveCurrency: receiveCurrency,
+          receiveAmount: receiveAmount,
+          rate: rate,
+          amount: amount,
+          status: 'pending',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          expiresAt: expiresAt,
+          reservedAmount: giveAmount,
+          reservedCurrency: giveCurrency
+        };
+        
+        await offersRef.doc(offerId).set(offerData);
+        
+        // تحديث محفظة المستخدم
+        const walletsRef = db.collection('wallets').doc(currentUser.id.toString());
+        await walletsRef.update({
+          [`balances.${giveCurrency}`]: firebase.firestore.FieldValue.increment(-giveAmount),
+          [`reservedBalances.${giveCurrency}`]: firebase.firestore.FieldValue.increment(giveAmount),
+          'updatedAt': firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // إنشاء صفقة
+        const tradesRef = db.collection('exchangeTrades');
+        const tradeId = offerId + '_creator';
+        
+        const tradeData = {
+          tradeId: tradeId,
+          offerId: offerId,
+          userId: currentUser.id.toString(),
+          userName: currentUser.firstName || 'مستخدم',
+          role: 'creator',
+          status: 'waiting',
+          giveAmount: giveAmount,
+          giveCurrency: giveCurrency,
+          receiveAmount: receiveAmount,
+          receiveCurrency: receiveCurrency,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          expiresAt: expiresAt
+        };
+        
+        await tradesRef.doc(tradeId).set(tradeData);
+        
+        // تحديث البيانات المحلية
+        userBalances[giveCurrency] = availableBalance - giveAmount;
+        updateLocalUserData();
+        
+        showToast(`✅ تم إنشاء العرض بنجاح! المبلغ محجوز لمدة 20 دقيقة`, 'success');
+        closeCreateOfferModal();
+        
+        updateWalletsListRealTime();
+        updateTotalBalance();
+        
+        setTimeout(() => {
+          loadMarketOffers();
+          loadMyActiveTrades();
+        }, 1000);
+        
+        return true;
+        
+      } catch (error) {
+        console.error('❌ Error creating exchange offer:', error);
+        showToast('❌ حدث خطأ أثناء إنشاء العرض: ' + error.message, 'error');
+        return false;
+      } finally {
+        hideWalletLoading();
+      }
+    }
+
     async function acceptExchangeOffer(offerId) {
       showWalletLoading();
       
       try {
-        // جلب بيانات العرض
         const offerRef = db.collection('exchangeOffers').doc(offerId);
         const offerDoc = await offerRef.get();
         
@@ -2717,38 +2578,30 @@
         
         const offerData = offerDoc.data();
         
-        // التحقق من حالة العرض
         if (offerData.status !== 'pending') {
           showToast('❌ هذا العرض غير متاح حالياً', 'error');
           return false;
         }
         
-        // التحقق من أن المستخدم لا يقبل عرضه الخاص
         if (offerData.creatorId === currentUser.id.toString()) {
           showToast('❌ لا يمكنك قبول عرضك الخاص', 'error');
           return false;
         }
         
-        // تحديد العملات والمبالغ للمستقبل
         let acceptorGiveCurrency, acceptorGiveAmount, acceptorReceiveCurrency, acceptorReceiveAmount;
         
         if (offerData.offerType === 'buy') {
-          // العرض: شخص يريد شراء دولار
-          // القابل: سيبيع الدولار ويأخذ الدينار
           acceptorGiveCurrency = 'USD';
-          acceptorGiveAmount = offerData.amount; // الدولار
+          acceptorGiveAmount = offerData.amount;
           acceptorReceiveCurrency = 'DZD';
-          acceptorReceiveAmount = offerData.giveAmount; // الدينار
+          acceptorReceiveAmount = offerData.giveAmount;
         } else {
-          // العرض: شخص يريد بيع دولار
-          // القابل: سيشتري الدولار ويعطي الدينار
           acceptorGiveCurrency = 'DZD';
-          acceptorGiveAmount = offerData.receiveAmount; // الدينار
+          acceptorGiveAmount = offerData.receiveAmount;
           acceptorReceiveCurrency = 'USD';
-          acceptorReceiveAmount = offerData.amount; // الدولار
+          acceptorReceiveAmount = offerData.amount;
         }
         
-        // التحقق من رصيد القابل
         const availableBalance = userBalances[acceptorGiveCurrency] || 0;
         if (availableBalance < acceptorGiveAmount) {
           const currencyName = acceptorGiveCurrency === 'DZD' ? 'دينار' : 'دولار';
@@ -2756,12 +2609,10 @@
           return false;
         }
         
-        // بدء المعاملة في قاعدة البيانات
         const batch = db.batch();
         const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-        const expiresAt = new Date(Date.now() + 20 * 60 * 1000); // 20 دقيقة من الآن
+        const expiresAt = new Date(Date.now() + 20 * 60 * 1000);
         
-        // 1. تحديث حالة العرض إلى محجوز
         batch.update(offerRef, {
           status: 'reserved',
           acceptorId: currentUser.id.toString(),
@@ -2769,7 +2620,6 @@
           expiresAt: expiresAt
         });
         
-        // 2. تحديث محفظة القابل (خصم المبلغ)
         const acceptorWalletsRef = db.collection('wallets').doc(currentUser.id.toString());
         batch.update(acceptorWalletsRef, {
           [`balances.${acceptorGiveCurrency}`]: firebase.firestore.FieldValue.increment(-acceptorGiveAmount),
@@ -2777,7 +2627,6 @@
           'updatedAt': timestamp
         });
         
-        // 3. إنشاء صفقة للقابل
         const tradesRef = db.collection('exchangeTrades');
         const tradeId = offerId + '_acceptor_' + currentUser.id;
         
@@ -2787,7 +2636,7 @@
           userId: currentUser.id.toString(),
           userName: currentUser.firstName || 'مستخدم',
           role: 'acceptor',
-          status: 'waiting', // waiting, confirmed, completed, cancelled
+          status: 'waiting',
           giveAmount: acceptorGiveAmount,
           giveCurrency: acceptorGiveCurrency,
           receiveAmount: acceptorReceiveAmount,
@@ -2799,7 +2648,6 @@
         
         batch.set(tradesRef.doc(tradeId), tradeData);
         
-        // 4. تحديث صفقة المنشئ
         const creatorTradeRef = tradesRef.doc(offerId + '_creator');
         batch.update(creatorTradeRef, {
           status: 'waiting',
@@ -2807,23 +2655,18 @@
           expiresAt: expiresAt
         });
         
-        // تنفيذ جميع العمليات معاً
         await batch.commit();
         
-        // تحديث البيانات المحلية للقابل
         userBalances[acceptorGiveCurrency] = availableBalance - acceptorGiveAmount;
         
         updateLocalUserData();
         showToast(`✅ تم قبول العرض! تم حجز المبالغ. لديك 20 دقيقة لإكمال الصفقة`, 'success');
         closeOfferDetailsModal();
         
-        // تحديث الواجهة
         updateWalletsListRealTime();
         updateTotalBalance();
         loadMarketOffers();
         loadMyActiveTrades();
-        
-        console.log('✅ Exchange offer accepted:', { offerId, acceptor: currentUser.id });
         
         return true;
         
@@ -2840,7 +2683,6 @@
       showWalletLoading();
       
       try {
-        // جلب بيانات الصفقة
         const tradeRef = db.collection('exchangeTrades').doc(tradeId);
         const tradeDoc = await tradeRef.get();
         
@@ -2852,25 +2694,21 @@
         const tradeData = tradeDoc.data();
         const offerId = tradeData.offerId;
         
-        // التحقق من أن الصفقة للمستخدم الحالي
         if (tradeData.userId !== currentUser.id.toString()) {
           showToast('❌ هذه الصفقة لا تعنيك', 'error');
           return false;
         }
         
-        // التحقق من حالة الصفقة
         if (tradeData.status !== 'waiting') {
           showToast('❌ الصفقة غير قابلة للتأكيد', 'error');
           return false;
         }
         
-        // تحديث حالة الصفقة إلى مؤكدة
         await tradeRef.update({
           status: 'confirmed',
           confirmedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        // التحقق مما إذا كانت الصفقة الأخرى مؤكدة
         const otherTradeQuery = await db.collection('exchangeTrades')
           .where('offerId', '==', offerId)
           .where('userId', '!=', currentUser.id.toString())
@@ -2884,7 +2722,6 @@
         });
         
         if (allConfirmed) {
-          // كلا الطرفين وافقا، إكمال الصفقة
           await completeExchangeTrade(offerId);
         } else {
           showToast('✅ تم تأكيد الصفقة! في انتظار تأكيد الطرف الآخر', 'success');
@@ -2907,7 +2744,6 @@
       showWalletLoading();
       
       try {
-        // جلب بيانات العرض
         const offerRef = db.collection('exchangeOffers').doc(offerId);
         const offerDoc = await offerRef.get();
         
@@ -2918,25 +2754,21 @@
         
         const offerData = offerDoc.data();
         
-        // التحقق من أن المستخدم هو منشئ العرض
         if (offerData.creatorId !== currentUser.id.toString()) {
           showToast('❌ لا يمكنك إلغاء عرض لا تنتمي إليه', 'error');
           return false;
         }
         
-        // التحقق من حالة العرض
         if (offerData.status === 'completed' || offerData.status === 'cancelled') {
           showToast('❌ لا يمكن إلغاء هذا العرض', 'error');
           return false;
         }
         
-        // تحديث حالة العرض إلى ملغي
         await offerRef.update({
           status: 'cancelled',
           cancelledAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        // تحرير المبلغ المحجوز
         if (offerData.status === 'pending' || offerData.status === 'reserved') {
           const walletsRef = db.collection('wallets').doc(currentUser.id.toString());
           await walletsRef.update({
@@ -2946,7 +2778,6 @@
           });
         }
         
-        // تحديث حالة الصفقات المرتبطة
         const tradesQuery = await db.collection('exchangeTrades')
           .where('offerId', '==', offerId)
           .get();
@@ -2961,13 +2792,11 @@
         
         await batch.commit();
         
-        // تحديث البيانات المحلية
         await refreshUserBalancesQuietly();
         
         showToast('✅ تم إلغاء العرض بنجاح', 'success');
         closeOfferDetailsModal();
         
-        // تحديث الواجهة
         updateWalletsListRealTime();
         updateTotalBalance();
         loadMarketOffers();
@@ -2986,7 +2815,6 @@
 
     async function completeExchangeTrade(offerId) {
       try {
-        // جلب بيانات العرض والصفقات
         const offerRef = db.collection('exchangeOffers').doc(offerId);
         const offerDoc = await offerRef.get();
         
@@ -3001,38 +2829,31 @@
           .where('offerId', '==', offerId)
           .get();
         
-        // بدء المعاملة في قاعدة البيانات
         const batch = db.batch();
         const timestamp = firebase.firestore.FieldValue.serverTimestamp();
         
-        // 1. تحديث حالة العرض إلى مكتمل
         batch.update(offerRef, {
           status: 'completed',
           completedAt: timestamp
         });
         
-        // 2. معالجة كل صفقة
         tradesQuery.forEach(tradeDoc => {
           const tradeData = tradeDoc.data();
           const tradeRef = tradeDoc.ref;
           
-          // تحديث حالة الصفقة إلى مكتملة
           batch.update(tradeRef, {
             status: 'completed',
             completedAt: timestamp
           });
           
-          // 3. تحويل الأموال المحجوزة للطرف الآخر
           const walletsRef = db.collection('wallets').doc(tradeData.userId);
           
-          // تحرير المبلغ المحجوز وإضافة المبلغ المستلم
           batch.update(walletsRef, {
             [`reservedBalances.${tradeData.giveCurrency}`]: firebase.firestore.FieldValue.increment(-tradeData.giveAmount),
             [`balances.${tradeData.receiveCurrency}`]: firebase.firestore.FieldValue.increment(tradeData.receiveAmount),
             'updatedAt': timestamp
           });
           
-          // 4. تسجيل المعاملة
           const transactionId = Date.now().toString() + '_' + tradeData.userId;
           const transactionRef = db.collection('transactions').doc(transactionId);
           
@@ -3054,22 +2875,16 @@
           batch.set(transactionRef, transactionData);
         });
         
-        // تنفيذ جميع العمليات معاً
         await batch.commit();
         
-        // تحديث بيانات المستخدم المحلية
         await refreshUserBalancesQuietly();
         
-        // إرسال إشعار للمستخدمين
         showToast('✅ تم إكمال الصفقة بنجاح! تم تحويل الأموال', 'success');
         
-        // تحديث الواجهة
         updateWalletsListRealTime();
         updateTotalBalance();
         loadMarketOffers();
         loadMyActiveTrades();
-        
-        console.log('✅ Exchange trade completed:', offerId);
         
         return true;
         
@@ -3138,7 +2953,6 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 تهيئة المحفظة الرقمية مع سوق التبادل...');
       
-      // معالجة الأخطاء العامة
       window.addEventListener('error', function(event) {
         console.error('🚨 خطأ غير متوقع:', event.error);
         showToast('🚨 حدث خطأ غير متوقع', 'error');
