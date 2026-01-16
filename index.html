@@ -1722,11 +1722,6 @@
               <button class="amount-btn" data-amount="10000">10,000</button>
               <button class="amount-btn" data-amount="50000">50,000</button>
             </div>
-            
-            <div class="form-group">
-              <label class="form-label">وصف المعاملة (اختياري)</label>
-              <textarea class="form-input" id="transferDescription" placeholder="مثال: دفع فاتورة أو هدية" rows="3"></textarea>
-            </div>
           </div>
           
           <div class="balance-info">
@@ -1756,10 +1751,6 @@
               <div class="detail-row">
                 <span class="detail-label">المبلغ:</span>
                 <span class="detail-value" id="confirmAmount">-</span>
-              </div>
-              <div class="detail-row">
-                <span class="detail-label">الوصف:</span>
-                <span class="detail-value" id="confirmDescription">لا يوجد</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">رسوم التحويل:</span>
@@ -2070,14 +2061,6 @@
                 </div>
               </div>
               
-              <div class="bank-form-group">
-                <label class="bank-form-label" for="bankNotes">
-                  <i class="fas fa-sticky-note"></i>
-                  ملاحظات إضافية (اختياري)
-                </label>
-                <textarea id="bankNotes" class="bank-form-input" placeholder="أي معلومات إضافية تريد إضافتها..." rows="3"></textarea>
-              </div>
-              
               <div class="deposit-summary" id="depositSummary" style="display: none; background: linear-gradient(to right, rgba(0, 102, 51, 0.05), rgba(0, 204, 102, 0.05)); border: 1px solid rgba(0, 102, 51, 0.1); border-radius: 10px; padding: 15px; margin: 15px 0;">
                 <div class="summary-title" style="font-weight: 700; color: var(--primary); margin-bottom: 10px; font-size: 14px;">ملخص طلب الإيداع:</div>
                 <div class="summary-item" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
@@ -2171,7 +2154,6 @@
       },
       amount: 0,
       currency: 'DZD',
-      description: '',
       transactionId: generateTransactionId()
     };
 
@@ -2234,13 +2216,13 @@
             lastName: userData.last_name || userData.lastName || '',
             username: userData.username,
             balances: {
-              DZD: 0.00,  // تم التغيير من 10000.00 إلى 0.00
-              USD: 0.00   // تم التغيير من 100.00 إلى 0.00
+              DZD: 10000.00,
+              USD: 100.00
             },
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
           });
-          console.log('✅ تم إنشاء مستخدم جديد مع رصيد صفر:', userData.id);
+          console.log('✅ تم إنشاء مستخدم جديد:', userData.id);
         } else {
           await userRef.update({
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
@@ -2302,7 +2284,7 @@
       }
     }
 
-    async function transferMoney(senderId, receiverId, currency, amount, description = '') {
+    async function transferMoney(senderId, receiverId, currency, amount) {
       try {
         showWalletLoading();
         
@@ -2316,7 +2298,6 @@
           receiverId: receiverId,
           currency: currency,
           amount: amount,
-          description: description,
           type: 'transfer',
           status: 'completed',
           timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -2565,7 +2546,7 @@
     }
 
     // ========== نظام طلبات الإيداع ==========
-    async function createDepositRequest(userId, amount, currency, transactionNumber, transferType, additionalInfo = {}) {
+    async function createDepositRequest(userId, amount, currency, transactionNumber, transferType) {
       try {
         if (!db) throw new Error('Firebase غير مهيئ');
         
@@ -2580,8 +2561,7 @@
           transferType: transferType,
           status: 'pending', // pending, approved, rejected
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          ...additionalInfo
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
         await depositRef.set(depositData);
@@ -2624,7 +2604,6 @@
         },
         amount: 0,
         currency: 'DZD',
-        description: '',
         transactionId: generateTransactionId()
       };
       
@@ -2641,7 +2620,6 @@
       document.getElementById('transferRecipientId').value = '';
       document.getElementById('transferRecipientName').value = '';
       document.getElementById('transferAmount').value = '';
-      document.getElementById('transferDescription').value = '';
       
       document.querySelectorAll('.currency-btn').forEach(btn => {
         btn.classList.remove('active');
@@ -2780,7 +2758,6 @@
       }
       
       transferData.amount = amount;
-      transferData.description = document.getElementById('transferDescription').value.trim();
       
       return true;
     }
@@ -2794,7 +2771,6 @@
       const total = transferData.amount + fees;
       
       document.getElementById('confirmAmount').textContent = `${transferData.amount.toFixed(2)} ${currencySymbol}`;
-      document.getElementById('confirmDescription').textContent = transferData.description || 'لا يوجد';
       document.getElementById('confirmFees').textContent = `${fees.toFixed(2)} ${currencySymbol}`;
       document.getElementById('confirmTotal').textContent = `${total.toFixed(2)} ${currencySymbol}`;
     }
@@ -2815,8 +2791,7 @@
           currentUser.id,
           transferData.recipient.id,
           transferData.currency,
-          transferData.amount,
-          transferData.description
+          transferData.amount
         );
         
         if (transactionId) {
@@ -3223,7 +3198,6 @@
       const transferType = document.getElementById('bankTransferType').value;
       const transactionNumber = document.getElementById('bankTransactionNumber').value.trim();
       const amountInput = document.getElementById('bankAmount').value.trim();
-      const notes = document.getElementById('bankNotes').value.trim();
       
       if (!transactionNumber) {
         showBankNotification('يرجى إدخال رقم العملية', true);
@@ -3260,8 +3234,7 @@
           amount,
           currency,
           transactionNumber,
-          transferType,
-          { notes: notes }
+          transferType
         );
         
         showBankNotification(`تم تقديم طلب الإيداع بنجاح`);
@@ -3275,7 +3248,6 @@
         setTimeout(() => {
           document.getElementById('bankTransactionNumber').value = '';
           document.getElementById('bankAmount').value = '';
-          document.getElementById('bankNotes').value = '';
           document.getElementById('depositSummary').style.display = 'none';
         }, 500);
         
