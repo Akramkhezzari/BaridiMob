@@ -1400,15 +1400,18 @@
       font-weight: 600;
     }
 
+    /* التعديل هنا: جعل الأزرار بجانب بعضها */
     .navigation-btns {
       display: flex;
-      gap: 15px;
+      gap: 10px;
       margin-top: 30px;
+      flex-direction: row;
+      flex-wrap: nowrap;
     }
 
     .nav-btn {
       flex: 1;
-      padding: 16px;
+      padding: 14px;
       border-radius: 10px;
       border: none;
       font-weight: 700;
@@ -1535,7 +1538,13 @@
       }
       
       .navigation-btns {
-        flex-direction: column;
+        flex-direction: row;
+        gap: 8px;
+      }
+      
+      .nav-btn {
+        padding: 12px;
+        font-size: 0.9rem;
       }
     }
 
