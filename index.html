@@ -1963,22 +1963,12 @@
         <div class="receive-grid">
           <!-- البطاقة الأولى: المعلومات الثابتة -->
           <div class="bank-card">
-            <div class="bank-icon-container">
-              <div class="bank-icon">
-                <i class="fas fa-university"></i>
-              </div>
-            </div>
-            
             <div class="bank-card-title">
               <i class="fas fa-id-card"></i>
               المعلومات الثابتة
             </div>
             
             <div class="bank-info-container">
-              <div class="bank-info-header">
-                <span class="bank-badge">معلومات مطلوبة</span>
-                <span class="bank-info-label">رقم التعريف (ID)</span>
-              </div>
               <div class="bank-info-box">
                 <div class="bank-info-value" id="bankUserId">جاري التحميل...</div>
                 <button class="bank-copy-btn" id="bankCopyIdBtn">
@@ -1994,11 +1984,11 @@
             
             <div class="bank-info-container">
               <div class="bank-info-header">
-                <span class="bank-badge baridi">BaridiMob</span>
+                <span class="bank-badge">BaridiMob</span>
                 <span class="bank-info-label">رقم الحساب</span>
               </div>
               <div class="bank-info-box">
-                <div class="bank-info-value" id="bankAccountNumber">079999900238685859563</div>
+                <div class="bank-info-value" id="bankAccountNumber">0799999002385412178</div>
                 <button class="bank-copy-btn" id="bankCopyAccountBtn">
                   <i class="far fa-copy"></i>
                   نسخ الرقم
@@ -2012,7 +2002,7 @@
             
             <div class="bank-info-container">
               <div class="bank-info-header">
-                <span class="bank-badge binance">Binance</span>
+                <span class="bank-badge" style="background:linear-gradient(to right, #F0B90B, #F0D90B);color:#1E2026">Binance</span>
                 <span class="bank-info-label">رقم تعريف</span>
               </div>
               <div class="bank-info-box">
@@ -2029,11 +2019,11 @@
             </div>
           </div>
           
-          <!-- البطاقة الثانية: تفاصيل التحويل الوارد -->
+          <!-- البطاقة الثانية: تقديم طلب إيداع -->
           <div class="bank-card">
             <div class="bank-card-title">
               <i class="fas fa-credit-card"></i>
-              تفاصيل التحويل الوارد
+              تقديم طلب إيداع
             </div>
             
             <div class="bank-form-container">
@@ -2043,24 +2033,13 @@
                   نوع التحويل
                 </label>
                 <select id="bankTransferType" class="bank-form-select">
-                  <option value="bank">تحويل بنكي</option>
-                  <option value="binance">تحويل عبر بينانس</option>
+                  <option value="bank">تحويل بنكي (BaridiMob)</option>
+                  <option value="binance">تحويل بينانس</option>
+                  <option value="other">طريقة أخرى</option>
                 </select>
                 <div class="bank-hint">
                   <i class="fas fa-info-circle"></i>
-                  اختر نوع التحويل المطلوب
-                </div>
-              </div>
-              
-              <div class="bank-form-group">
-                <label class="bank-form-label" for="bankTransactionNumber">
-                  <i class="fas fa-receipt"></i>
-                  رقم المعاملة
-                </label>
-                <input type="text" id="bankTransactionNumber" class="bank-form-input" placeholder="أدخل رقم المعاملة كما ورد في الإشعار">
-                <div class="bank-hint">
-                  <i class="fas fa-info-circle"></i>
-                  يمكنك العثور على رقم المعاملة في إشعار البنك أو تطبيق التحويل
+                  اختر طريقة التحويل التي استخدمتها
                 </div>
               </div>
               
@@ -2070,23 +2049,64 @@
                   المبلغ المحول
                 </label>
                 <div class="bank-amount-container">
-                  <input type="text" id="bankAmount" class="bank-form-input" placeholder="0.00">
+                  <input type="number" id="bankAmount" class="bank-form-input" placeholder="0.00" step="0.01" min="1">
                   <div class="bank-currency-symbol" id="bankCurrencySymbol">DZD</div>
                 </div>
                 <div class="bank-hint">
                   <i class="fas fa-info-circle"></i>
-                  <span id="bankCurrencyHint">أدخل المبلغ بالدينار الجزائري (مثال: 150000.50)</span>
+                  <span id="bankCurrencyHint">أدخل المبلغ بالدينار الجزائري</span>
+                </div>
+              </div>
+              
+              <div class="bank-form-group">
+                <label class="bank-form-label" for="bankTransactionNumber">
+                  <i class="fas fa-receipt"></i>
+                  رقم العملية أو المرجع
+                </label>
+                <input type="text" id="bankTransactionNumber" class="bank-form-input" placeholder="أدخل رقم العملية كما في الإشعار">
+                <div class="bank-hint">
+                  <i class="fas fa-info-circle"></i>
+                  يمكنك العثور على رقم العملية في إشعار البنك أو تطبيق التحويل
+                </div>
+              </div>
+              
+              <div class="bank-form-group">
+                <label class="bank-form-label" for="bankNotes">
+                  <i class="fas fa-sticky-note"></i>
+                  ملاحظات إضافية (اختياري)
+                </label>
+                <textarea id="bankNotes" class="bank-form-input" placeholder="أي معلومات إضافية تريد إضافتها..." rows="3"></textarea>
+              </div>
+              
+              <div class="deposit-summary" id="depositSummary" style="display: none; background: linear-gradient(to right, rgba(0, 102, 51, 0.05), rgba(0, 204, 102, 0.05)); border: 1px solid rgba(0, 102, 51, 0.1); border-radius: 10px; padding: 15px; margin: 15px 0;">
+                <div class="summary-title" style="font-weight: 700; color: var(--primary); margin-bottom: 10px; font-size: 14px;">ملخص طلب الإيداع:</div>
+                <div class="summary-item" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                  <span>المبلغ:</span>
+                  <span id="summaryAmount">0.00 DZD</span>
+                </div>
+                <div class="summary-item" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                  <span>طريقة التحويل:</span>
+                  <span id="summaryMethod">-</span>
+                </div>
+                <div class="summary-item" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                  <span>رقم العملية:</span>
+                  <span id="summaryTransaction">-</span>
                 </div>
               </div>
               
               <button class="bank-submit-btn" id="bankSubmitBtn">
                 <i class="fas fa-paper-plane"></i>
-                تأكيد وإرسال البيانات
+                تقديم طلب الإيداع
               </button>
               
-              <div class="bank-success-animation" id="bankSuccessAnimation">
-                <i class="fas fa-check-circle"></i>
-                <p>تم إرسال بيانات التحويل بنجاح</p>
+              <div class="bank-success-animation" id="depositSuccessAnimation" style="display: none; text-align: center; margin-top: 20px; background-color: rgba(46, 204, 113, 0.1); padding: 20px; border-radius: 10px; border: 1px solid rgba(46, 204, 113, 0.3);">
+                <div class="success-icon-circle" style="width: 60px; height: 60px; background: var(--success); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; margin: 0 auto 15px;">
+                  <i class="fas fa-check"></i>
+                </div>
+                <h3 style="color: var(--success); margin-bottom: 10px; text-align: center;">تم تقديم الطلب بنجاح!</h3>
+                <p style="text-align: center; color: var(--text-gray); margin-bottom: 8px; font-size: 14px;">رقم طلبك: <strong id="depositRequestId">-</strong></p>
+                <p style="text-align: center; color: var(--text-gray); margin-bottom: 8px; font-size: 14px;">سيتم مراجعة طلبك من قبل الإدارة خلال 24 ساعة.</p>
+                <p style="text-align: center; color: var(--text-gray); margin-bottom: 8px; font-size: 14px;">يمكنك متابعة حالة الطلب من قسم "طلباتي".</p>
               </div>
             </div>
           </div>
@@ -2139,8 +2159,8 @@
     };
 
     let exchangeRates = {
-      'USD_DZD': 134.5,
-      'DZD_USD': 0.0074
+      'USD_DZD': 245.5,
+      'DZD_USD': 0.00408
     };
 
     let transferData = {
@@ -2544,6 +2564,37 @@
         });
     }
 
+    // ========== نظام طلبات الإيداع ==========
+    async function createDepositRequest(userId, amount, currency, transactionNumber, transferType, additionalInfo = {}) {
+      try {
+        if (!db) throw new Error('Firebase غير مهيئ');
+        
+        const depositRef = db.collection('deposit_requests').doc();
+        const depositData = {
+          id: depositRef.id,
+          userId: userId,
+          userName: currentUser.firstName + (currentUser.lastName ? ' ' + currentUser.lastName : ''),
+          amount: amount,
+          currency: currency,
+          transactionNumber: transactionNumber,
+          transferType: transferType,
+          status: 'pending', // pending, approved, rejected
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          ...additionalInfo
+        };
+        
+        await depositRef.set(depositData);
+        
+        showToast('✅ تم تقديم طلب الإيداع بنجاح', 'success');
+        return depositRef.id;
+      } catch (error) {
+        console.error('❌ خطأ في إنشاء طلب الإيداع:', error);
+        showToast(`❌ خطأ في إنشاء طلب الإيداع: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+
     // ========== دوال النظام الجديد لإرسال الأموال ==========
     function openMoneyTransferModal() {
       document.getElementById('moneyTransferModal').classList.add('open');
@@ -2787,7 +2838,6 @@
           
           document.getElementById('transferSuccessScreen').style.display = 'block';
           
-          // تحديث دالة زر "إرسال جديدة"
           document.getElementById('newTransferBtn').onclick = function() {
             resetTransferForm();
             document.getElementById('transferSuccessScreen').style.display = 'none';
@@ -3020,7 +3070,6 @@
         container.appendChild(card);
       });
 
-      // إضافة أحداث للفلاتر
       document.querySelectorAll('.exchange-filter-btn').forEach(button => {
         button.addEventListener('click', function() {
           document.querySelectorAll('.exchange-filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -3041,7 +3090,6 @@
         });
       });
 
-      // إضافة أحداث لأزرار التبادل
       document.querySelectorAll('.exchange-action-btn').forEach(button => {
         button.addEventListener('click', function() {
           const orderId = this.getAttribute('data-id');
@@ -3166,63 +3214,81 @@
       
       notification.classList.add('show');
       
-      // إخفاء الإشعار تلقائياً بعد 3 ثوان
       setTimeout(() => {
         notification.classList.remove('show');
       }, 3000);
     }
 
-    function processBankTransfer() {
+    async function processBankTransfer() {
       const transferType = document.getElementById('bankTransferType').value;
       const transactionNumber = document.getElementById('bankTransactionNumber').value.trim();
-      const amount = document.getElementById('bankAmount').value.trim();
-      const currency = transferType === 'bank' ? 'DZD' : 'USD';
-      const transferTypeName = transferType === 'bank' ? 'بنكي' : 'بينانس';
+      const amountInput = document.getElementById('bankAmount').value.trim();
+      const notes = document.getElementById('bankNotes').value.trim();
       
       if (!transactionNumber) {
-        showBankNotification('يرجى إدخال رقم المعاملة', true);
+        showBankNotification('يرجى إدخال رقم العملية', true);
         document.getElementById('bankTransactionNumber').focus();
         return;
       }
       
-      if (!amount) {
+      if (!amountInput) {
         showBankNotification('يرجى إدخال المبلغ المحول', true);
         document.getElementById('bankAmount').focus();
         return;
       }
       
-      if (isNaN(parseFloat(amount)) || !isFinite(amount)) {
-        showBankNotification('يرجى إدخال مبلغ صحيح (رقم)', true);
+      const amount = parseFloat(amountInput);
+      if (isNaN(amount) || !isFinite(amount) || amount <= 0) {
+        showBankNotification('يرجى إدخال مبلغ صحيح (رقم أكبر من صفر)', true);
         document.getElementById('bankAmount').focus();
         return;
       }
       
-      showBankNotification(`تم إرسال بيانات التحويل ${transferTypeName} بنجاح`);
+      const currency = transferType === 'binance' ? 'USD' : 'DZD';
+      const minAmount = currency === 'DZD' ? 1000 : 10;
       
-      const successAnimation = document.getElementById('bankSuccessAnimation');
-      successAnimation.style.display = 'block';
+      if (amount < minAmount) {
+        showBankNotification(`الحد الأدنى للإيداع هو ${minAmount} ${currency === 'DZD' ? 'دج' : '$'}`, true);
+        return;
+      }
       
-      setTimeout(() => {
-        document.getElementById('bankTransactionNumber').value = '';
-        document.getElementById('bankAmount').value = '';
-      }, 500);
-      
-      setTimeout(() => {
-        successAnimation.style.display = 'none';
-      }, 3000);
-      
-      const submitBtn = document.getElementById('bankSubmitBtn');
-      const originalHTML = submitBtn.innerHTML;
-      const originalBackground = submitBtn.style.background;
-      submitBtn.innerHTML = '<i class="fas fa-check"></i> تم الإرسال بنجاح';
-      submitBtn.style.background = 'linear-gradient(to right, var(--success), #26c97c)';
-      submitBtn.disabled = true;
-      
-      setTimeout(() => {
-        submitBtn.innerHTML = originalHTML;
-        submitBtn.style.background = originalBackground;
-        submitBtn.disabled = false;
-      }, 3000);
+      try {
+        showWalletLoading();
+        
+        const requestId = await createDepositRequest(
+          currentUser.id,
+          amount,
+          currency,
+          transactionNumber,
+          transferType,
+          { notes: notes }
+        );
+        
+        showBankNotification(`تم تقديم طلب الإيداع بنجاح`);
+        
+        const successAnimation = document.getElementById('depositSuccessAnimation');
+        const requestIdSpan = document.getElementById('depositRequestId');
+        
+        requestIdSpan.textContent = requestId.substring(0, 8) + '...';
+        successAnimation.style.display = 'block';
+        
+        setTimeout(() => {
+          document.getElementById('bankTransactionNumber').value = '';
+          document.getElementById('bankAmount').value = '';
+          document.getElementById('bankNotes').value = '';
+          document.getElementById('depositSummary').style.display = 'none';
+        }, 500);
+        
+        setTimeout(() => {
+          successAnimation.style.display = 'none';
+        }, 5000);
+        
+      } catch (error) {
+        console.error('❌ خطأ في معالجة طلب الإيداع:', error);
+        showBankNotification('حدث خطأ أثناء تقديم الطلب', true);
+      } finally {
+        hideWalletLoading();
+      }
     }
 
     function initializeBankCopyButtons() {
@@ -3296,6 +3362,26 @@
             showBankNotification('فشل في نسخ النص، يرجى المحاولة مرة أخرى', true);
           });
       });
+    }
+
+    // ========== تحديث ملخص طلب الإيداع ==========
+    function updateDepositSummary() {
+      const amount = document.getElementById('bankAmount').value;
+      const type = document.getElementById('bankTransferType').value;
+      const transactionNumber = document.getElementById('bankTransactionNumber').value;
+      
+      if (amount && transactionNumber) {
+        const currency = type === 'binance' ? 'USD' : 'DZD';
+        document.getElementById('summaryAmount').textContent = 
+          `${parseFloat(amount).toLocaleString()} ${currency}`;
+        
+        const methodText = type === 'bank' ? 'تحويل بنكي' : 
+                          type === 'binance' ? 'بينانس' : 'طريقة أخرى';
+        
+        document.getElementById('summaryMethod').textContent = methodText;
+        document.getElementById('summaryTransaction').textContent = transactionNumber;
+        document.getElementById('depositSummary').style.display = 'block';
+      }
     }
 
     // ========== تهيئة الأحداث ==========
@@ -3430,6 +3516,18 @@
       document.getElementById('receiveCloseBtn').addEventListener('click', closeReceiveModal);
       document.getElementById('bankSubmitBtn').addEventListener('click', processBankTransfer);
       initializeBankCopyButtons();
+      
+      // أحداث تحديث ملخص الإيداع
+      document.getElementById('bankTransferType').addEventListener('change', function() {
+        const currency = this.value === 'binance' ? 'USD' : 'DZD';
+        document.getElementById('bankCurrencySymbol').textContent = currency;
+        document.getElementById('bankCurrencyHint').textContent = 
+          `أدخل المبلغ بال${currency === 'DZD' ? 'دينار الجزائري' : 'دولار الأمريكي'}`;
+        updateDepositSummary();
+      });
+      
+      document.getElementById('bankAmount').addEventListener('input', updateDepositSummary);
+      document.getElementById('bankTransactionNumber').addEventListener('input', updateDepositSummary);
       
       // إغلاق النوافذ بالنقر خارجها
       document.getElementById('moneyTransferModal').addEventListener('click', function(e) {
