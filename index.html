@@ -1114,46 +1114,63 @@
     }
 
     .transfer-header {
-      background: linear-gradient(to right, var(--primary), var(--secondary));
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: white;
-      padding: 25px 30px;
+      padding: 20px 15px;
       text-align: center;
-      position: relative;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .transfer-header h1 {
-      font-size: 1.8rem;
+      font-size: 1.4rem;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
+      margin-top: 0;
     }
 
     .transfer-header p {
       opacity: 0.9;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
+      margin-bottom: 0;
     }
 
-    .back-btn {
+    .transfer-close-btn {
       position: absolute;
-      right: 20px;
+      right: 15px;
       top: 50%;
       transform: translateY(-50%);
       background: rgba(255, 255, 255, 0.2);
       border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
       color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 24px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      transition: all 0.3s ease;
+      z-index: 11;
+    }
+
+    .transfer-close-btn:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .back-btn {
+      display: none;
     }
 
     .transfer-content {
-      padding: 30px;
+      padding: 20px;
       max-width: 500px;
       margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     .step-indicator {
@@ -1622,9 +1639,7 @@
     <!-- ========== نافذة إرسال الأموال الجديدة ========== -->
     <div class="money-transfer-modal" id="moneyTransferModal">
       <div class="transfer-header">
-        <button class="back-btn" id="transferBackBtn">
-          <i class="fas fa-home"></i>
-        </button>
+        <button class="transfer-close-btn" id="transferCloseBtn">&times;</button>
         <h1>إرسال الأموال</h1>
         <p>أرسل أموالك بسهولة وأمان</p>
       </div>
@@ -3326,8 +3341,12 @@
       
       // أحداث نظام إرسال الأموال الجديد
       document.getElementById('walletSendBtn').addEventListener('click', openMoneyTransferModal);
-      document.getElementById('transferBackBtn').addEventListener('click', function() {
-        if (confirm('هل تريد العودة للصفحة الرئيسية؟ سيتم إلغاء العملية الحالية.')) {
+      document.getElementById('transferCloseBtn').addEventListener('click', function() {
+        if (transferData.currentStep > 1) {
+          if (confirm('هل تريد إغلاق نافذة الإرسال؟ سيتم فقدان البيانات غير المحفوظة.')) {
+            closeMoneyTransferModal();
+          }
+        } else {
           closeMoneyTransferModal();
         }
       });
@@ -3395,7 +3414,13 @@
       // إغلاق النوافذ بالنقر خارجها
       document.getElementById('moneyTransferModal').addEventListener('click', function(e) {
         if (e.target === this) {
-          closeMoneyTransferModal();
+          if (transferData.currentStep > 1) {
+            if (confirm('هل تريد إغلاق نافذة الإرسال؟ سيتم فقدان البيانات غير المحفوظة.')) {
+              closeMoneyTransferModal();
+            }
+          } else {
+            closeMoneyTransferModal();
+          }
         }
       });
       
