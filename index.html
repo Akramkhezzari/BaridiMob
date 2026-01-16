@@ -2234,13 +2234,13 @@
             lastName: userData.last_name || userData.lastName || '',
             username: userData.username,
             balances: {
-              DZD: 10000.00,
-              USD: 100.00
+              DZD: 0.00,  // تم التغيير من 10000.00 إلى 0.00
+              USD: 0.00   // تم التغيير من 100.00 إلى 0.00
             },
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
           });
-          console.log('✅ تم إنشاء مستخدم جديد:', userData.id);
+          console.log('✅ تم إنشاء مستخدم جديد مع رصيد صفر:', userData.id);
         } else {
           await userRef.update({
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
