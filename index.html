@@ -1347,35 +1347,12 @@
       border-color: var(--dollar-light);
     }
 
-    .quick-amounts {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .amount-btn {
-      padding: 12px;
-      border: 2px solid var(--border-light);
-      border-radius: 10px;
-      background: white;
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.3s;
-      text-align: center;
-    }
-
-    .amount-btn:hover {
-      border-color: var(--primary);
-      color: var(--primary);
-    }
-
-    .balance-info {
+    .available-balance-display {
       background: linear-gradient(to right, rgba(0, 102, 51, 0.05), rgba(0, 204, 102, 0.05));
       border: 1px solid rgba(0, 102, 51, 0.1);
       border-radius: 10px;
       padding: 15px;
-      margin-top: 20px;
+      margin-top: 15px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -1557,10 +1534,6 @@
         font-size: 0.7rem;
       }
       
-      .quick-amounts {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
       .navigation-btns {
         flex-direction: column;
       }
@@ -1716,17 +1689,10 @@
               </div>
             </div>
             
-            <div class="quick-amounts">
-              <button class="amount-btn" data-amount="1000">1,000</button>
-              <button class="amount-btn" data-amount="5000">5,000</button>
-              <button class="amount-btn" data-amount="10000">10,000</button>
-              <button class="amount-btn" data-amount="50000">50,000</button>
+            <div class="available-balance-display">
+              <span class="balance-label">رصيدك المتاح:</span>
+              <span class="balance-amount" id="step2AvailableBalance">0.00 دج</span>
             </div>
-          </div>
-          
-          <div class="balance-info">
-            <span class="balance-label">رصيدك المتاح:</span>
-            <span class="balance-amount" id="transferAvailableBalance2">0.00 دج</span>
           </div>
         </div>
 
@@ -2516,6 +2482,7 @@
               updateTotalBalance();
               updateTransferBalanceDisplay();
               updateAvailableBalances();
+              updateStep2BalanceDisplay();
             }
           }
         }, (error) => {
@@ -2579,6 +2546,7 @@
     function openMoneyTransferModal() {
       document.getElementById('moneyTransferModal').classList.add('open');
       updateTransferBalanceDisplay();
+      updateStep2BalanceDisplay();
     }
 
     function closeMoneyTransferModal() {
@@ -2592,7 +2560,14 @@
       const balanceText = `${balance.toFixed(2)} ${currencySymbol}`;
       
       document.getElementById('transferAvailableBalance').textContent = balanceText;
-      document.getElementById('transferAvailableBalance2').textContent = balanceText;
+    }
+
+    function updateStep2BalanceDisplay() {
+      const currencySymbol = transferData.currency === 'DZD' ? 'دج' : '$';
+      const balance = userBalances[transferData.currency] || 0;
+      const balanceText = `${balance.toFixed(2)} ${currencySymbol}`;
+      
+      document.getElementById('step2AvailableBalance').textContent = balanceText;
     }
 
     function resetTransferForm() {
@@ -2635,6 +2610,7 @@
       
       hideTransferAlerts();
       updateTransferBalanceDisplay();
+      updateStep2BalanceDisplay();
     }
 
     async function goToNextTransferStep() {
@@ -3409,6 +3385,7 @@
         updateTotalBalance();
         updateTransferBalanceDisplay();
         updateAvailableBalances();
+        updateStep2BalanceDisplay();
       }
       
       // أحداث نظام إرسال الأموال الجديد
@@ -3438,15 +3415,7 @@
           this.classList.add('active');
           transferData.currency = this.dataset.currency;
           updateTransferBalanceDisplay();
-        });
-      });
-      
-      document.querySelectorAll('.amount-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const amount = this.dataset.amount;
-          document.getElementById('transferAmount').value = amount;
-          transferData.amount = parseFloat(amount);
-          validateTransferStep2();
+          updateStep2BalanceDisplay();
         });
       });
       
