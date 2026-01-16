@@ -1563,6 +1563,153 @@
       max-width: 300px;
       direction: rtl;
     }
+
+    /* نافذة السحب إلى Binance */
+    .withdraw-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.95);
+      z-index: 200;
+      display: none;
+      overflow-y: auto;
+    }
+
+    .withdraw-modal.open {
+      display: block;
+    }
+
+    .withdraw-header {
+      background: linear-gradient(135deg, #F0B90B, #F0D90B);
+      color: #1E2026;
+      padding: 20px 15px;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .withdraw-header h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 5px;
+      margin-top: 0;
+    }
+
+    .withdraw-header p {
+      opacity: 0.9;
+      font-size: 0.9rem;
+      margin-bottom: 0;
+    }
+
+    .withdraw-close-btn {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(30, 32, 38, 0.2);
+      border: none;
+      color: #1E2026;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 11;
+    }
+
+    .withdraw-content {
+      padding: 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .withdraw-card {
+      background: var(--bg-lighter);
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 25px;
+      border: 1px solid var(--border-light);
+    }
+
+    .withdraw-title {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      color: #F0B90B;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .withdraw-title i {
+      margin-left: 10px;
+      font-size: 1.5rem;
+    }
+
+    .withdraw-balance-info {
+      background: linear-gradient(to right, rgba(240, 185, 11, 0.05), rgba(240, 217, 11, 0.05));
+      border: 1px solid rgba(240, 185, 11, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    .withdraw-balance-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
+    }
+
+    .withdraw-balance-row:last-child {
+      margin-bottom: 0;
+      font-weight: 700;
+      color: #1E2026;
+    }
+
+    .withdraw-fees-info {
+      background: rgba(255, 71, 87, 0.05);
+      border: 1px solid rgba(255, 71, 87, 0.1);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 15px;
+      font-size: 0.85rem;
+      color: var(--text-gray);
+    }
+
+    .withdraw-fees-info i {
+      color: var(--danger);
+      margin-left: 5px;
+    }
+
+    /* زر السحب الجديد */
+    .wallet-withdraw-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-weight: 700;
+      cursor: pointer;
+      background: linear-gradient(90deg, #F0B90B, #F0D90B);
+      color: #1E2026;
+      box-shadow: 0 4px 16px rgba(240, 185, 11, 0.2);
+      font-size: 14px;
+      transition: all 0.3s ease;
+      min-width: 120px;
+    }
+
+    .wallet-withdraw-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(240, 185, 11, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -1599,6 +1746,7 @@
         <div class="wallet-actions">
           <button class="wallet-send-btn" id="walletSendBtn">📤 إرسال أموال</button>
           <button class="wallet-neon-btn" id="walletReceiveBtn">📥 استلام أموال</button>
+          <button class="wallet-withdraw-btn" id="walletWithdrawBtn">💳 سحب إلى Binance</button>
           <button class="wallet-exchange-btn" id="walletNetworkBtn">🔗 شبكة التبادل</button>
         </div>
 
@@ -1781,6 +1929,142 @@
           <button class="nav-btn next" id="transferNextBtn">
             التالي
             <i class="fas fa-arrow-left"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== نافذة سحب إلى Binance ========== -->
+    <div class="withdraw-modal" id="withdrawModal">
+      <div class="withdraw-header">
+        <button class="withdraw-close-btn" id="withdrawCloseBtn">&times;</button>
+        <h1>سحب إلى Binance</h1>
+        <p>سحب أموالك إلى حساب Binance الخاص بك</p>
+      </div>
+
+      <div class="withdraw-content">
+        <div class="withdraw-card">
+          <div class="withdraw-title">
+            <i class="fab fa-binance"></i>
+            معلومات السحب
+          </div>
+          
+          <div class="withdraw-balance-info">
+            <div class="withdraw-balance-row">
+              <span class="balance-label">رصيد الدولار المتاح:</span>
+              <span class="balance-amount" id="withdrawAvailableUSD">0.00 $</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">عملة السحب</label>
+            <div class="currency-options">
+              <button class="currency-btn usd active" data-withdraw-currency="USD">الدولار الأمريكي ($)</button>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">المبلغ المراد سحبه</label>
+            <div class="input-with-icon">
+              <input type="number" class="form-input" id="withdrawAmount" placeholder="0.00" step="0.01" min="0">
+              <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="withdraw-fees-info">
+              <i class="fas fa-info-circle"></i>
+              الحد الأدنى للسحب: <span id="withdrawMinAmount">10 $</span> | رسوم السحب: <span id="withdrawFeeAmount">1 $</span>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">معرف Binance الخاص بك</label>
+            <div class="input-with-icon">
+              <input type="text" class="form-input" id="withdrawBinanceId" placeholder="أدخل رقم المعرف أو البريد الإلكتروني">
+              <i class="fas fa-user-circle"></i>
+            </div>
+            <div class="bank-hint">
+              <i class="fas fa-info-circle"></i>
+              يمكنك العثور على رقم المعرف في صفحة الملف الشخصي في تطبيق Binance
+            </div>
+          </div>
+          
+          <div class="available-balance-display">
+            <span class="balance-label">المبلغ الذي سيتم استلامه:</span>
+            <span class="balance-amount" id="withdrawReceiveAmount">0.00 $</span>
+          </div>
+        </div>
+        
+        <div class="alert error" id="withdrawErrorAlert"></div>
+        <div class="alert success" id="withdrawSuccessAlert"></div>
+        
+        <div class="transaction-details" id="withdrawSummary" style="display: none;">
+          <div class="detail-row">
+            <span class="detail-label">المبلغ:</span>
+            <span class="detail-value" id="summaryWithdrawAmount">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">رسوم السحب:</span>
+            <span class="detail-value" id="summaryWithdrawFee">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">المبلغ المستلم:</span>
+            <span class="detail-value" id="summaryWithdrawReceive">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">معرف Binance:</span>
+            <span class="detail-value" id="summaryBinanceId">-</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">المبلغ الإجمالي:</span>
+            <span class="detail-value" id="summaryWithdrawTotal">-</span>
+          </div>
+        </div>
+        
+        <div class="success-screen" id="withdrawSuccessScreen" style="display: none;">
+          <div class="success-icon">
+            <i class="fas fa-check"></i>
+          </div>
+          
+          <h2 class="success-title">تم تقديم طلب السحب!</h2>
+          <p class="success-message" id="withdrawSuccessMessage">
+            تم تقديم طلب السحب بنجاح.<br>
+            سيتم مراجعة طلبك من قبل الإدارة خلال 24 ساعة.
+          </p>
+          
+          <div class="transaction-details">
+            <div class="detail-row">
+              <span class="detail-label">رقم الطلب:</span>
+              <span class="detail-value" id="withdrawRequestId">-</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">التاريخ والوقت:</span>
+              <span class="detail-value" id="withdrawRequestTime">-</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">حالة الطلب:</span>
+              <span class="detail-value" style="color: var(--warning);">قيد المراجعة</span>
+            </div>
+          </div>
+          
+          <div class="navigation-btns" style="margin-top: 30px;">
+            <button class="nav-btn back" id="newWithdrawBtn">
+              <i class="fas fa-redo"></i>
+              سحب جديد
+            </button>
+          </div>
+        </div>
+        
+        <div class="navigation-btns" id="withdrawNavigationBtns">
+          <button class="nav-btn next" id="withdrawPreviewBtn">
+            <i class="fas fa-eye"></i>
+            معاينة الطلب
+          </button>
+          <button class="nav-btn confirm" id="withdrawSubmitBtn" style="display: none;">
+            <i class="fas fa-paper-plane"></i>
+            تأكيد السحب
+          </button>
+          <button class="nav-btn back" id="withdrawEditBtn" style="display: none;">
+            <i class="fas fa-edit"></i>
+            تعديل
           </button>
         </div>
       </div>
@@ -1969,7 +2253,7 @@
             <div class="bank-info-container">
               <div class="bank-info-header">
                 <span class="bank-badge" style="background:linear-gradient(to right, #F0B90B, #F0D90B);color:#1E2026">Binance</span>
-                <span class="bank-info-label">رقم تعريف</span>
+                <span class="bank-info-label">رقم تعريف للسحب</span>
               </div>
               <div class="bank-info-box">
                 <div class="bank-info-value" id="bankBinanceId">1143951718</div>
@@ -1980,7 +2264,7 @@
               </div>
               <div class="bank-hint">
                 <i class="fas fa-info-circle"></i>
-                رقم المعرف الخاص بحساب بينانس للمعاملات الرقمية
+                رقم المعرف الخاص بحساب بينانس لسحب الأموال إليه
               </div>
             </div>
           </div>
@@ -2113,7 +2397,7 @@
 
     let userBalances = {
       'DZD': 0.00,
-      'USD': 0.00
+      'USDT': 0.00
     };
 
     let exchangeRates = {
@@ -2136,6 +2420,19 @@
     let userUnsubscribe = null;
     let exchangeUnsubscribe = null;
 
+    // ========== بيانات السحب ==========
+    let withdrawData = {
+      currency: 'USD', // الآن فقط الدولار
+      amount: 0,
+      binanceId: '',
+      fees: {
+        'USD': 1.00
+      },
+      minAmounts: {
+        'USD': 10.00
+      }
+    };
+
     // ========== دوال المساعدة ==========
     function showToast(message, type = 'info') {
       const existingToasts = document.querySelectorAll('.wallet-toast');
@@ -2151,6 +2448,9 @@
         toast.style.background = 'rgba(245, 158, 11, 0.9)';
       } else if (type === 'success') {
         toast.style.background = 'rgba(34, 197, 94, 0.9)';
+      } else if (type === 'binance') {
+        toast.style.background = 'linear-gradient(to right, #F0B90B, #F0D90B)';
+        toast.style.color = '#1E2026';
       }
       
       document.body.appendChild(toast);
@@ -2176,6 +2476,18 @@
       document.getElementById('walletLoadingSpinner').style.display = 'none';
     }
 
+    function generateTransactionId() {
+      const prefix = 'TRX-';
+      const randomNum = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+      return prefix + randomNum;
+    }
+
+    function generateWithdrawId() {
+      const prefix = 'WDR-';
+      const randomNum = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+      return prefix + randomNum;
+    }
+
     // ========== دوال Firebase ==========
     async function saveUserToFirebase(userData) {
       try {
@@ -2192,8 +2504,9 @@
             username: userData.username,
             balances: {
               DZD: 10000.00,
-              USD: 100.00
+              USDT: 100.00
             },
+            binanceId: '',
             createdAt: firebase.firestore.FieldValue.serverTimestamp(),
             lastLogin: firebase.firestore.FieldValue.serverTimestamp()
           });
@@ -2259,215 +2572,103 @@
       }
     }
 
-    async function transferMoney(senderId, receiverId, currency, amount) {
+    // ========== نظام طلبات الإيداع ==========
+    async function createDepositRequest(userId, amount, currency, transactionNumber, transferType) {
       try {
-        showWalletLoading();
+        if (!db) throw new Error('Firebase غير مهيئ');
         
-        await updateUserBalance(senderId, currency, amount, false);
-        await updateUserBalance(receiverId, currency, amount, true);
-        
-        const transactionRef = db.collection('transactions').doc();
-        await transactionRef.set({
-          id: transactionRef.id,
-          senderId: senderId,
-          receiverId: receiverId,
-          currency: currency,
-          amount: amount,
-          type: 'transfer',
-          status: 'completed',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        showToast(`✅ تم إرسال ${amount} ${currency} بنجاح`, 'success');
-        return transactionRef.id;
-      } catch (error) {
-        console.error('❌ خطأ في التحويل:', error);
-        showToast(`❌ خطأ في التحويل: ${error.message}`, 'error');
-        return null;
-      } finally {
-        hideWalletLoading();
-      }
-    }
-
-    async function createExchangeOrder(userId, type, sellAmount, exchangeRate) {
-      try {
-        showWalletLoading();
-        
-        const sellCurrency = type === 'sell-usd' ? 'USD' : 'DZD';
-        const receiveCurrency = type === 'sell-usd' ? 'DZD' : 'USD';
-        
-        const userData = await getUserFromFirebase(userId);
-        if (!userData || (userData.balances?.[sellCurrency] || 0) < sellAmount) {
-          throw new Error('الرصيد غير كافي');
-        }
-        
-        await updateUserBalance(userId, sellCurrency, sellAmount, false);
-        
-        const orderRef = db.collection('exchange_orders').doc();
-        const orderData = {
-          id: orderRef.id,
+        const depositRef = db.collection('deposit_requests').doc();
+        const depositData = {
+          id: depositRef.id,
           userId: userId,
-          userName: userData.firstName || 'مستخدم',
-          type: type,
-          sellCurrency: sellCurrency,
-          sellAmount: sellAmount,
-          receiveCurrency: receiveCurrency,
-          exchangeRate: exchangeRate,
-          status: 'active',
+          userName: currentUser.firstName + (currentUser.lastName ? ' ' + currentUser.lastName : ''),
+          amount: amount,
+          currency: currency,
+          transactionNumber: transactionNumber,
+          transferType: transferType,
+          status: 'pending',
           createdAt: firebase.firestore.FieldValue.serverTimestamp(),
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
-        await orderRef.set(orderData);
+        await depositRef.set(depositData);
         
-        showToast('✅ تم إنشاء طلب التبادل بنجاح', 'success');
-        return orderRef.id;
+        showToast('✅ تم تقديم طلب الإيداع بنجاح', 'success');
+        return depositRef.id;
       } catch (error) {
-        console.error('❌ خطأ في إنشاء طلب التبادل:', error);
-        showToast(`❌ خطأ في إنشاء طلب التبادل: ${error.message}`, 'error');
-        return null;
+        console.error('❌ خطأ في إنشاء طلب الإيداع:', error);
+        showToast(`❌ خطأ في إنشاء طلب الإيداع: ${error.message}`, 'error');
+        throw error;
+      }
+    }
+
+    // ========== نظام طلبات السحب ==========
+    async function createWithdrawRequest(userId, amount, currency, binanceId) {
+      try {
+        showWalletLoading();
+        
+        if (!db) throw new Error('Firebase غير مهيئ');
+        
+        // التحقق من الرصيد
+        const userData = await getUserFromFirebase(userId);
+        if (!userData || (userData.balances?.[currency] || 0) < (amount + withdrawData.fees[currency])) {
+          throw new Error('الرصيد غير كافي للسحب مع احتساب الرسوم');
+        }
+        
+        // خصم المبلغ من رصيد المستخدم (المبلغ + الرسوم)
+        await updateUserBalance(userId, currency, amount + withdrawData.fees[currency], false);
+        
+        const withdrawRef = db.collection('withdraw_requests').doc();
+        const withdrawData = {
+          id: withdrawRef.id,
+          requestId: generateWithdrawId(),
+          userId: userId,
+          userName: currentUser.firstName + (currentUser.lastName ? ' ' + currentUser.lastName : ''),
+          amount: amount,
+          currency: currency,
+          binanceId: binanceId,
+          fees: withdrawData.fees[currency],
+          netAmount: amount - withdrawData.fees[currency],
+          status: 'pending', // pending, processing, completed, rejected
+          adminNotes: '',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await withdrawRef.set(withdrawData);
+        
+        // إرسال إشعار للإدارة (يمكن إضافة إشعار في مجموعة التلغرام)
+        sendAdminNotification(withdrawData);
+        
+        showToast('✅ تم تقديم طلب السحب بنجاح', 'binance');
+        return withdrawRef.id;
+      } catch (error) {
+        console.error('❌ خطأ في إنشاء طلب السحب:', error);
+        showToast(`❌ خطأ في إنشاء طلب السحب: ${error.message}`, 'error');
+        throw error;
       } finally {
         hideWalletLoading();
       }
     }
 
-    async function executeExchange(orderId, buyerId) {
-      try {
-        showWalletLoading();
-        
-        const orderRef = db.collection('exchange_orders').doc(orderId);
-        const orderDoc = await orderRef.get();
-        
-        if (!orderDoc.exists) {
-          throw new Error('طلب التبادل غير موجود');
-        }
-        
-        const order = orderDoc.data();
-        
-        if (order.status !== 'active') {
-          throw new Error('طلب التبادل غير متاح');
-        }
-        
-        if (order.userId === buyerId) {
-          throw new Error('لا يمكنك التبادل مع نفسك');
-        }
-        
-        let buyerSellAmount, buyerReceiveAmount, sellerReceiveAmount;
-        
-        if (order.type === 'sell-usd') {
-          buyerSellAmount = order.sellAmount * order.exchangeRate;
-          buyerReceiveAmount = order.sellAmount;
-          sellerReceiveAmount = buyerSellAmount;
-        } else {
-          buyerSellAmount = order.sellAmount / order.exchangeRate;
-          buyerReceiveAmount = order.sellAmount;
-          sellerReceiveAmount = buyerSellAmount;
-        }
-        
-        const buyerData = await getUserFromFirebase(buyerId);
-        if (!buyerData) {
-          throw new Error('بيانات المشتري غير موجودة');
-        }
-        
-        const buyerCurrency = order.type === 'sell-usd' ? 'DZD' : 'USD';
-        if ((buyerData.balances?.[buyerCurrency] || 0) < buyerSellAmount) {
-          throw new Error('رصيد المشتري غير كافي');
-        }
-        
-        const batch = db.batch();
-        
-        const buyerRef = db.collection('users').doc(buyerId.toString());
-        const buyerCurrentBalance = buyerData.balances?.[buyerCurrency] || 0;
-        batch.update(buyerRef, {
-          [`balances.${buyerCurrency}`]: buyerCurrentBalance - buyerSellAmount
+    function sendAdminNotification(withdrawData) {
+      // هذه الدالة لإرسال إشعار للإدارة
+      // يمكن تنفيذها بإرسال رسالة إلى مجموعة التلغرام أو قاعدة بيانات منفصلة
+      console.log('📢 إشعار للإدارة:', withdrawData);
+      
+      // مثال: حفظ في مجموعة خاصة بالإشعارات
+      if (db) {
+        db.collection('admin_notifications').add({
+          type: 'withdraw_request',
+          requestId: withdrawData.requestId,
+          userId: withdrawData.userId,
+          userName: withdrawData.userName,
+          amount: withdrawData.amount,
+          currency: withdrawData.currency,
+          binanceId: withdrawData.binanceId,
+          status: 'new',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-        
-        const buyerReceiveCurrency = order.type === 'sell-usd' ? 'USD' : 'DZD';
-        const buyerCurrentReceiveBalance = buyerData.balances?.[buyerReceiveCurrency] || 0;
-        batch.update(buyerRef, {
-          [`balances.${buyerReceiveCurrency}`]: buyerCurrentReceiveBalance + buyerReceiveAmount
-        });
-        
-        const sellerRef = db.collection('users').doc(order.userId.toString());
-        const sellerData = await sellerRef.get();
-        const sellerCurrentBalance = sellerData.data()?.balances?.[order.sellCurrency] || 0;
-        batch.update(sellerRef, {
-          [`balances.${order.sellCurrency}`]: sellerCurrentBalance + sellerReceiveAmount
-        });
-        
-        batch.update(orderRef, {
-          status: 'completed',
-          buyerId: buyerId,
-          buyerName: buyerData.firstName || 'مشتري',
-          completedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        const transactionRef = db.collection('transactions').doc();
-        batch.set(transactionRef, {
-          id: transactionRef.id,
-          orderId: orderId,
-          sellerId: order.userId,
-          buyerId: buyerId,
-          sellerCurrency: order.sellCurrency,
-          sellerAmount: order.sellAmount,
-          buyerCurrency: buyerCurrency,
-          buyerAmount: buyerSellAmount,
-          exchangeRate: order.exchangeRate,
-          type: 'exchange',
-          status: 'completed',
-          timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        await batch.commit();
-        
-        showToast('✅ تم إتمام التبادل بنجاح', 'success');
-        return true;
-      } catch (error) {
-        console.error('❌ خطأ في تنفيذ التبادل:', error);
-        showToast(`❌ خطأ في التبادل: ${error.message}`, 'error');
-        return false;
-      } finally {
-        hideWalletLoading();
-      }
-    }
-
-    async function cancelExchangeOrder(orderId, userId) {
-      try {
-        showWalletLoading();
-        
-        const orderRef = db.collection('exchange_orders').doc(orderId);
-        const orderDoc = await orderRef.get();
-        
-        if (!orderDoc.exists) {
-          throw new Error('طلب التبادل غير موجود');
-        }
-        
-        const order = orderDoc.data();
-        
-        if (order.userId !== userId) {
-          throw new Error('لا يمكنك إلغاء طلب ليس لك');
-        }
-        
-        if (order.status !== 'active') {
-          throw new Error('لا يمكن إلغاء طلب غير نشط');
-        }
-        
-        await updateUserBalance(userId, order.sellCurrency, order.sellAmount, true);
-        
-        await orderRef.update({
-          status: 'cancelled',
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        showToast('✅ تم إلغاء طلب التبادل', 'success');
-        return true;
-      } catch (error) {
-        console.error('❌ خطأ في إلغاء طلب التبادل:', error);
-        showToast(`❌ خطأ في الإلغاء: ${error.message}`, 'error');
-        return false;
-      } finally {
-        hideWalletLoading();
       }
     }
 
@@ -2485,13 +2686,14 @@
             
             if (userData.balances) {
               userBalances.DZD = userData.balances.DZD || 0;
-              userBalances.USD = userData.balances.USD || 0;
+              userBalances.USDT = userData.balances.USDT || 0;
               
               updateWalletsListRealTime();
               updateTotalBalance();
               updateTransferBalanceDisplay();
               updateAvailableBalances();
               updateStep2BalanceDisplay();
+              updateWithdrawBalances();
             }
           }
         }, (error) => {
@@ -2521,34 +2723,255 @@
         });
     }
 
-    // ========== نظام طلبات الإيداع ==========
-    async function createDepositRequest(userId, amount, currency, transactionNumber, transferType) {
+    // ========== دوال المحفظة ==========
+    function updateUserInterface(userData) {
       try {
-        if (!db) throw new Error('Firebase غير مهيئ');
+        const userName = userData.firstName || userData.first_name || 'مستخدم';
+        const userLastName = userData.lastName || userData.last_name || '';
+        const fullName = userName + (userLastName ? ' ' + userLastName : '');
         
-        const depositRef = db.collection('deposit_requests').doc();
-        const depositData = {
-          id: depositRef.id,
-          userId: userId,
-          userName: currentUser.firstName + (currentUser.lastName ? ' ' + currentUser.lastName : ''),
-          amount: amount,
-          currency: currency,
-          transactionNumber: transactionNumber,
-          transferType: transferType,
-          status: 'pending', // pending, approved, rejected
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
+        document.getElementById('walletUserName').textContent = fullName;
+        document.getElementById('walletUserId').textContent = `id: ${userData.id}`;
+        document.getElementById('walletCoinIcon').textContent = '💰';
         
-        await depositRef.set(depositData);
+        document.getElementById('bankUserId').textContent = userData.id;
         
-        showToast('✅ تم تقديم طلب الإيداع بنجاح', 'success');
-        return depositRef.id;
+        // تحديث معلومات Binance إذا كانت موجودة
+        if (userData.binanceId) {
+          document.getElementById('bankBinanceId').textContent = userData.binanceId;
+        }
+        
       } catch (error) {
-        console.error('❌ خطأ في إنشاء طلب الإيداع:', error);
-        showToast(`❌ خطأ في إنشاء طلب الإيداع: ${error.message}`, 'error');
-        throw error;
+        console.error('❌ خطأ في تحديث واجهة المستخدم:', error);
       }
+    }
+
+    function updateWalletsListRealTime() {
+      const walletsList = document.getElementById('walletWalletsList');
+      walletsList.innerHTML = '';
+      
+      const dzdBalance = userBalances['DZD'] || 0;
+      const dzdElement = document.createElement('div');
+      dzdElement.className = 'wallet-coin-row';
+      dzdElement.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="wallet-badge">دج</div>
+          <div class="wallet-coin-meta">
+            <div class="n">الدينار الجزائري</div>
+            <div class="s">DZD - العملة الوطنية</div>
+            <div class="rate">1 دج = ${exchangeRates.DZD_USD.toFixed(4)} $</div>
+          </div>
+        </div>
+        <div class="wallet-coin-val">
+          <div class="qty">${dzdBalance.toFixed(2)} DZD</div>
+          <div class="fiat">${(dzdBalance * exchangeRates.DZD_USD).toFixed(2)} $</div>
+          <div class="change positive">↻ محفظة نشطة</div>
+        </div>
+      `;
+      walletsList.appendChild(dzdElement);
+      
+      const usdtBalance = userBalances['USDT'] || 0;
+      const usdtElement = document.createElement('div');
+      usdtElement.className = 'wallet-coin-row';
+      usdtElement.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px">
+          <div class="wallet-badge usd">$</div>
+          <div class="wallet-coin-meta">
+            <div class="n">دولار أمريكي USDT</div>
+            <div class="s">USDT - عملة رقمية مستقرة</div>
+            <div class="rate">1 USDT = ${exchangeRates.USD_DZD.toFixed(2)} دج</div>
+          </div>
+        </div>
+        <div class="wallet-coin-val">
+          <div class="qty">${usdtBalance.toFixed(2)} USDT</div>
+          <div class="fiat">${(usdtBalance * exchangeRates.USD_DZD).toFixed(2)} دج</div>
+          <div class="change positive">↻ محفظة نشطة</div>
+        </div>
+      `;
+      walletsList.appendChild(usdtElement);
+    }
+
+    function updateTotalBalance() {
+      let totalBalanceDZD = 0;
+      totalBalanceDZD += userBalances['DZD'] || 0;
+      totalBalanceDZD += (userBalances['USDT'] || 0) * exchangeRates.USD_DZD;
+      document.getElementById('walletTotalBalance').textContent = `${totalBalanceDZD.toFixed(2)} دج`;
+    }
+
+    // ========== دوال السحب إلى Binance ==========
+    function openWithdrawModal() {
+      document.getElementById('withdrawModal').classList.add('open');
+      updateWithdrawBalances();
+      updateWithdrawFeesDisplay();
+      resetWithdrawForm();
+    }
+
+    function closeWithdrawModal() {
+      document.getElementById('withdrawModal').classList.remove('open');
+    }
+
+    function updateWithdrawBalances() {
+      document.getElementById('withdrawAvailableUSD').textContent = `${userBalances['USDT'].toFixed(2)} $`;
+    }
+
+    function updateWithdrawFeesDisplay() {
+      const currency = withdrawData.currency;
+      document.getElementById('withdrawMinAmount').textContent = `${withdrawData.minAmounts[currency]} $`;
+      document.getElementById('withdrawFeeAmount').textContent = `${withdrawData.fees[currency]} $`;
+    }
+
+    function calculateWithdrawReceiveAmount() {
+      const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+      const currency = withdrawData.currency;
+      const fee = withdrawData.fees[currency];
+      const receiveAmount = amount - fee;
+      
+      document.getElementById('withdrawReceiveAmount').textContent = 
+        `${receiveAmount > 0 ? receiveAmount.toFixed(2) : '0.00'} $`;
+    }
+
+    function validateWithdrawForm() {
+      const amount = parseFloat(document.getElementById('withdrawAmount').value) || 0;
+      const binanceId = document.getElementById('withdrawBinanceId').value.trim();
+      const currency = withdrawData.currency;
+      const minAmount = withdrawData.minAmounts[currency];
+      const userBalance = userBalances[currency] || 0;
+      const totalAmount = amount + withdrawData.fees[currency];
+      
+      // إخفاء رسائل الخطأ القديمة
+      hideWithdrawAlerts();
+      
+      if (!binanceId) {
+        showWithdrawError('يرجى إدخال معرف Binance الخاص بك');
+        return false;
+      }
+      
+      if (!amount || amount <= 0) {
+        showWithdrawError('يرجى إدخال مبلغ صحيح');
+        return false;
+      }
+      
+      if (amount < minAmount) {
+        showWithdrawError(`الحد الأدنى للسحب هو ${minAmount} $`);
+        return false;
+      }
+      
+      if (totalAmount > userBalance) {
+        showWithdrawError('رصيدك غير كافي للسحب مع احتساب الرسوم');
+        return false;
+      }
+      
+      withdrawData.amount = amount;
+      withdrawData.binanceId = binanceId;
+      
+      return true;
+    }
+
+    function showWithdrawPreview() {
+      if (!validateWithdrawForm()) return;
+      
+      const currency = withdrawData.currency;
+      const fee = withdrawData.fees[currency];
+      const receiveAmount = withdrawData.amount - fee;
+      const totalAmount = withdrawData.amount + fee;
+      
+      // تحديث الملخص
+      document.getElementById('summaryWithdrawAmount').textContent = `${withdrawData.amount.toFixed(2)} $`;
+      document.getElementById('summaryWithdrawFee').textContent = `${fee.toFixed(2)} $`;
+      document.getElementById('summaryWithdrawReceive').textContent = `${receiveAmount.toFixed(2)} $`;
+      document.getElementById('summaryBinanceId').textContent = withdrawData.binanceId;
+      document.getElementById('summaryWithdrawTotal').textContent = `${totalAmount.toFixed(2)} $`;
+      
+      // إظهار الملخص وإخفاء النموذج
+      document.getElementById('withdrawSummary').style.display = 'block';
+      document.getElementById('withdrawPreviewBtn').style.display = 'none';
+      document.getElementById('withdrawSubmitBtn').style.display = 'flex';
+      document.getElementById('withdrawEditBtn').style.display = 'flex';
+      
+      hideWithdrawAlerts();
+    }
+
+    function editWithdrawForm() {
+      // إخفاء الملخص وإظهار النموذج
+      document.getElementById('withdrawSummary').style.display = 'none';
+      document.getElementById('withdrawPreviewBtn').style.display = 'flex';
+      document.getElementById('withdrawSubmitBtn').style.display = 'none';
+      document.getElementById('withdrawEditBtn').style.display = 'none';
+    }
+
+    async function submitWithdrawRequest() {
+      try {
+        showWalletLoading();
+        
+        const requestId = await createWithdrawRequest(
+          currentUser.id,
+          withdrawData.amount,
+          withdrawData.currency,
+          withdrawData.binanceId
+        );
+        
+        if (requestId) {
+          // إظهار شاشة النجاح
+          document.getElementById('withdrawSuccessScreen').style.display = 'block';
+          document.getElementById('withdrawSummary').style.display = 'none';
+          document.getElementById('withdrawNavigationBtns').style.display = 'none';
+          
+          document.getElementById('withdrawRequestId').textContent = requestId;
+          document.getElementById('withdrawRequestTime').textContent = new Date().toLocaleString('ar-EG', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+          });
+          
+          showWithdrawSuccess('تم تقديم طلب السحب بنجاح!');
+          
+          // إعادة تعيين النموذج بعد 5 ثواني
+          setTimeout(() => {
+            resetWithdrawForm();
+          }, 5000);
+        }
+      } catch (error) {
+        showWithdrawError('حدث خطأ أثناء تقديم طلب السحب');
+      } finally {
+        hideWalletLoading();
+      }
+    }
+
+    function resetWithdrawForm() {
+      withdrawData.amount = 0;
+      withdrawData.binanceId = '';
+      
+      document.getElementById('withdrawAmount').value = '';
+      document.getElementById('withdrawBinanceId').value = '';
+      document.getElementById('withdrawReceiveAmount').textContent = '0.00 $';
+      
+      document.getElementById('withdrawSummary').style.display = 'none';
+      document.getElementById('withdrawSuccessScreen').style.display = 'none';
+      
+      document.getElementById('withdrawPreviewBtn').style.display = 'flex';
+      document.getElementById('withdrawSubmitBtn').style.display = 'none';
+      document.getElementById('withdrawEditBtn').style.display = 'none';
+      document.getElementById('withdrawNavigationBtns').style.display = 'flex';
+      
+      hideWithdrawAlerts();
+    }
+
+    function showWithdrawError(message) {
+      const errorAlert = document.getElementById('withdrawErrorAlert');
+      errorAlert.textContent = message;
+      errorAlert.style.display = 'block';
+      document.getElementById('withdrawSuccessAlert').style.display = 'none';
+    }
+
+    function showWithdrawSuccess(message) {
+      const successAlert = document.getElementById('withdrawSuccessAlert');
+      successAlert.textContent = message;
+      successAlert.style.display = 'block';
+      document.getElementById('withdrawErrorAlert').style.display = 'none';
+    }
+
+    function hideWithdrawAlerts() {
+      document.getElementById('withdrawErrorAlert').style.display = 'none';
+      document.getElementById('withdrawSuccessAlert').style.display = 'none';
     }
 
     // ========== دوال النظام الجديد لإرسال الأموال ==========
@@ -2832,82 +3255,6 @@
       document.getElementById('transferSuccessAlert').style.display = 'none';
     }
 
-    function generateTransactionId() {
-      const prefix = 'TRX-';
-      const randomNum = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
-      return prefix + randomNum;
-    }
-
-    // ========== دوال المحفظة ==========
-    function updateUserInterface(userData) {
-      try {
-        const userName = userData.firstName || userData.first_name || 'مستخدم';
-        const userLastName = userData.lastName || userData.last_name || '';
-        const fullName = userName + (userLastName ? ' ' + userLastName : '');
-        
-        document.getElementById('walletUserName').textContent = fullName;
-        document.getElementById('walletUserId').textContent = `id: ${userData.id}`;
-        document.getElementById('walletCoinIcon').textContent = '💰';
-        
-        document.getElementById('bankUserId').textContent = userData.id;
-        
-      } catch (error) {
-        console.error('❌ خطأ في تحديث واجهة المستخدم:', error);
-      }
-    }
-
-    function updateWalletsListRealTime() {
-      const walletsList = document.getElementById('walletWalletsList');
-      walletsList.innerHTML = '';
-      
-      const dzdBalance = userBalances['DZD'] || 0;
-      const dzdElement = document.createElement('div');
-      dzdElement.className = 'wallet-coin-row';
-      dzdElement.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="wallet-badge">دج</div>
-          <div class="wallet-coin-meta">
-            <div class="n">الدينار الجزائري</div>
-            <div class="s">DZD - العملة الوطنية</div>
-            <div class="rate">1 دج = ${exchangeRates.DZD_USD.toFixed(4)} $</div>
-          </div>
-        </div>
-        <div class="wallet-coin-val">
-          <div class="qty">${dzdBalance.toFixed(2)} DZD</div>
-          <div class="fiat">${(dzdBalance * exchangeRates.DZD_USD).toFixed(2)} $</div>
-          <div class="change positive">↻ محفظة نشطة</div>
-        </div>
-      `;
-      walletsList.appendChild(dzdElement);
-      
-      const usdBalance = userBalances['USD'] || 0;
-      const usdElement = document.createElement('div');
-      usdElement.className = 'wallet-coin-row';
-      usdElement.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px">
-          <div class="wallet-badge usd">$</div>
-          <div class="wallet-coin-meta">
-            <div class="n">الدولار الأمريكي</div>
-            <div class="s">USD - عملة دولية</div>
-            <div class="rate">1 $ = ${exchangeRates.USD_DZD.toFixed(2)} دج</div>
-          </div>
-        </div>
-        <div class="wallet-coin-val">
-          <div class="qty">${usdBalance.toFixed(2)} USD</div>
-          <div class="fiat">${(usdBalance * exchangeRates.USD_DZD).toFixed(2)} دج</div>
-          <div class="change positive">↻ محفظة نشطة</div>
-        </div>
-      `;
-      walletsList.appendChild(usdElement);
-    }
-
-    function updateTotalBalance() {
-      let totalBalanceDZD = 0;
-      totalBalanceDZD += userBalances['DZD'] || 0;
-      totalBalanceDZD += (userBalances['USD'] || 0) * exchangeRates.USD_DZD;
-      document.getElementById('walletTotalBalance').textContent = `${totalBalanceDZD.toFixed(2)} دج`;
-    }
-
     // ========== دوال شبكة التبادل ==========
     function openExchangeModal() {
       document.getElementById('exchangeModal').classList.add('open');
@@ -3111,7 +3458,7 @@
     function updateAvailableBalances() {
       if (userBalances) {
         document.getElementById('availableDZD').textContent = `${userBalances['DZD'].toFixed(2)} دج`;
-        document.getElementById('availableUSD').textContent = `${userBalances['USD'].toFixed(2)} $`;
+        document.getElementById('availableUSD').textContent = `${userBalances['USDT'].toFixed(2)} $`;
       }
     }
 
@@ -3203,11 +3550,11 @@
         return;
       }
       
-      const currency = transferType === 'binance' ? 'USD' : 'DZD';
+      const currency = transferType === 'binance' ? 'USDT' : 'DZD';
       const minAmount = currency === 'DZD' ? 1000 : 10;
       
       if (amount < minAmount) {
-        showBankNotification(`الحد الأدنى للإيداع هو ${minAmount} ${currency === 'DZD' ? 'دج' : '$'}`, true);
+        showBankNotification(`الحد الأدنى للإيداع هو ${minAmount} ${currency === 'DZD' ? 'دج' : 'USDT'}`, true);
         return;
       }
       
@@ -3328,12 +3675,12 @@
       const transactionNumber = document.getElementById('bankTransactionNumber').value;
       
       if (amount && transactionNumber) {
-        const currency = type === 'binance' ? 'USD' : 'DZD';
+        const currency = type === 'binance' ? 'USDT' : 'DZD';
         document.getElementById('summaryAmount').textContent = 
           `${parseFloat(amount).toLocaleString()} ${currency}`;
         
         const methodText = type === 'bank' ? 'تحويل بنكي' : 
-                          type === 'binance' ? 'بينانس' : 'طريقة أخرى';
+                          type === 'binance' ? 'بينانس (USDT)' : 'طريقة أخرى';
         
         document.getElementById('summaryMethod').textContent = methodText;
         document.getElementById('summaryTransaction').textContent = transactionNumber;
@@ -3384,7 +3731,7 @@
         
         if (userData.balances) {
           userBalances.DZD = userData.balances.DZD || 0;
-          userBalances.USD = userData.balances.USD || 0;
+          userBalances.USDT = userData.balances.USDT || 0;
         }
         
         setupRealtimeUserListener(currentUser.id);
@@ -3395,6 +3742,7 @@
         updateTransferBalanceDisplay();
         updateAvailableBalances();
         updateStep2BalanceDisplay();
+        updateWithdrawBalances();
       }
       
       // أحداث نظام إرسال الأموال الجديد
@@ -3437,6 +3785,22 @@
         await validateTransferStep1();
       });
       
+      // أحداث نظام السحب إلى Binance
+      document.getElementById('walletWithdrawBtn').addEventListener('click', openWithdrawModal);
+      document.getElementById('withdrawCloseBtn').addEventListener('click', closeWithdrawModal);
+      document.getElementById('withdrawPreviewBtn').addEventListener('click', showWithdrawPreview);
+      document.getElementById('withdrawSubmitBtn').addEventListener('click', submitWithdrawRequest);
+      document.getElementById('withdrawEditBtn').addEventListener('click', editWithdrawForm);
+      document.getElementById('newWithdrawBtn').addEventListener('click', function() {
+        resetWithdrawForm();
+      });
+      
+      // أحداث تحديث المبلغ المستلم
+      document.getElementById('withdrawAmount').addEventListener('input', function() {
+        withdrawData.amount = parseFloat(this.value) || 0;
+        calculateWithdrawReceiveAmount();
+      });
+      
       // أحداث شبكة التبادل
       document.getElementById('walletNetworkBtn').addEventListener('click', openExchangeModal);
       document.getElementById('exchangeCloseBtn').addEventListener('click', closeExchangeModal);
@@ -3469,10 +3833,10 @@
       
       // أحداث تحديث ملخص الإيداع
       document.getElementById('bankTransferType').addEventListener('change', function() {
-        const currency = this.value === 'binance' ? 'USD' : 'DZD';
+        const currency = this.value === 'binance' ? 'USDT' : 'DZD';
         document.getElementById('bankCurrencySymbol').textContent = currency;
         document.getElementById('bankCurrencyHint').textContent = 
-          `أدخل المبلغ بال${currency === 'DZD' ? 'دينار الجزائري' : 'دولار الأمريكي'}`;
+          `أدخل المبلغ بال${currency === 'DZD' ? 'دينار الجزائري' : 'USDT (تيثر)'}`;
         updateDepositSummary();
       });
       
@@ -3489,6 +3853,12 @@
           } else {
             closeMoneyTransferModal();
           }
+        }
+      });
+      
+      document.getElementById('withdrawModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          closeWithdrawModal();
         }
       });
       
