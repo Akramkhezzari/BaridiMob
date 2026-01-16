@@ -2029,7 +2029,7 @@
             </div>
           </div>
           
-          <!-- البطاقة الثانية: تفاصيل التحويل -->
+          <!-- البطاقة الثانية: تفاصيل التحويل الوارد -->
           <div class="bank-card">
             <div class="bank-card-title">
               <i class="fas fa-credit-card"></i>
@@ -2786,6 +2786,16 @@
           `;
           
           document.getElementById('transferSuccessScreen').style.display = 'block';
+          
+          // تحديث دالة زر "إرسال جديدة"
+          document.getElementById('newTransferBtn').onclick = function() {
+            resetTransferForm();
+            document.getElementById('transferSuccessScreen').style.display = 'none';
+            document.getElementById('transferStep1').style.display = 'block';
+            document.getElementById('transferStep1').classList.add('active');
+            document.getElementById('transferNavigationBtns').style.display = 'flex';
+          };
+          
           transferData.transactionId = generateTransactionId();
         }
       } catch (error) {
@@ -3156,6 +3166,7 @@
       
       notification.classList.add('show');
       
+      // إخفاء الإشعار تلقائياً بعد 3 ثوان
       setTimeout(() => {
         notification.classList.remove('show');
       }, 3000);
@@ -3186,7 +3197,7 @@
         return;
       }
       
-      showBankNotification(`تم إرسال بيانات التحويل ${transferTypeName} بنجاح: رقم المعاملة ${transactionNumber} والمبلغ ${amount} ${currency}`);
+      showBankNotification(`تم إرسال بيانات التحويل ${transferTypeName} بنجاح`);
       
       const successAnimation = document.getElementById('bankSuccessAnimation');
       successAnimation.style.display = 'block';
@@ -3202,12 +3213,15 @@
       
       const submitBtn = document.getElementById('bankSubmitBtn');
       const originalHTML = submitBtn.innerHTML;
+      const originalBackground = submitBtn.style.background;
       submitBtn.innerHTML = '<i class="fas fa-check"></i> تم الإرسال بنجاح';
       submitBtn.style.background = 'linear-gradient(to right, var(--success), #26c97c)';
+      submitBtn.disabled = true;
       
       setTimeout(() => {
         submitBtn.innerHTML = originalHTML;
-        submitBtn.style.background = 'linear-gradient(to right, var(--success), #26c97c)';
+        submitBtn.style.background = originalBackground;
+        submitBtn.disabled = false;
       }, 3000);
     }
 
@@ -3352,7 +3366,13 @@
       });
       document.getElementById('transferNextBtn').addEventListener('click', goToNextTransferStep);
       document.getElementById('transferPrevBtn').addEventListener('click', goToPreviousTransferStep);
-      document.getElementById('newTransferBtn').addEventListener('click', resetTransferForm);
+      document.getElementById('newTransferBtn').addEventListener('click', function() {
+        resetTransferForm();
+        document.getElementById('transferSuccessScreen').style.display = 'none';
+        document.getElementById('transferStep1').style.display = 'block';
+        document.getElementById('transferStep1').classList.add('active');
+        document.getElementById('transferNavigationBtns').style.display = 'flex';
+      });
       
       document.querySelectorAll('.currency-btn').forEach(btn => {
         btn.addEventListener('click', function() {
