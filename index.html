@@ -477,6 +477,12 @@
       border-color: var(--primary);
     }
 
+    .exchange-filter-btn.my-orders {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: white;
+      border-color: var(--primary);
+    }
+
     .exchange-container {
       padding: 15px;
       display: grid;
@@ -501,6 +507,11 @@
       display: flex;
       flex-direction: column;
       box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+    }
+
+    .exchange-card.my-order {
+      border: 2px solid var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 102, 51, 0.15);
     }
 
     .exchange-card-header {
@@ -530,6 +541,12 @@
       background: rgba(34, 197, 94, 0.1);
       color: var(--success);
       border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .exchange-badge.my-order {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: white;
+      border: 1px solid var(--primary);
     }
 
     .exchange-user-info {
@@ -647,6 +664,11 @@
       gap: 8px;
       margin-top: 8px;
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .exchange-action-btn.cancel {
+      background: linear-gradient(135deg, var(--danger), #ff6b6b);
       color: white;
     }
 
@@ -2085,6 +2107,7 @@
         <button class="exchange-filter-btn active" data-filter="all">جميع الطلبات</button>
         <button class="exchange-filter-btn" data-filter="sell-dzd">بيع دينار</button>
         <button class="exchange-filter-btn" data-filter="sell-usd">بيع دولار</button>
+        <button class="exchange-filter-btn my-orders" data-filter="my-orders">طلباتي</button>
       </div>
 
       <div class="exchange-container" id="exchangeContainer">
@@ -2378,6 +2401,7 @@
     let db;
     let firebaseApp;
     let currentExchangeOrderId = null;
+    let currentFilter = 'all';
 
     try {
       firebaseApp = firebase.initializeApp(firebaseConfig);
@@ -2712,22 +2736,21 @@
         exchangeUnsubscribe();
       }
       
-      // تم التعديل هنا: إزالة orderBy لأنه كان يسبب مشكلة في العرض
       exchangeUnsubscribe = db.collection('exchange_orders')
-        .where('status', '==', 'active')
+        .where('status', 'in', ['active', 'pending', 'completed'])
         .onSnapshot((snapshot) => {
           activeExchangeOrders = [];
           snapshot.forEach((doc) => {
             const order = doc.data();
-            order.id = doc.id; // التأكد من وجود معرف الطلب
+            order.id = doc.id;
             order.createdAt = order.createdAt?.toDate() || new Date();
             activeExchangeOrders.push(order);
           });
           
-          // ترتيب الطلبات حسب تاريخ الإنشاء تنازلياً (على جانب العميل)
+          // ترتيب الطلبات حسب تاريخ الإنشاء تنازلياً
           activeExchangeOrders.sort((a, b) => b.createdAt - a.createdAt);
           
-          console.log(`✅ تم استرجاع ${activeExchangeOrders.length} طلب تبادل نشط`);
+          console.log(`✅ تم استرجاع ${activeExchangeOrders.length} طلب تبادل`);
           
           renderExchangeCards();
         }, (error) => {
@@ -3264,6 +3287,8 @@
     // ========== دوال شبكة التبادل ==========
     function openExchangeModal() {
       document.getElementById('exchangeModal').classList.add('open');
+      currentFilter = 'all';
+      updateFilterButtons();
     }
 
     function closeExchangeModal() {
@@ -3288,27 +3313,50 @@
       const container = document.getElementById('exchangeContainer');
       container.innerHTML = '';
 
-      if (activeExchangeOrders.length === 0) {
-        container.innerHTML = `
-          <div style="text-align:center;padding:40px 20px;color:var(--text-light);">
-            <i class="fas fa-exchange-alt" style="font-size:48px;margin-bottom:15px;opacity:0.5;"></i>
-            <div style="font-size:16px;margin-bottom:10px;">لا توجد طلبات تبادل حالياً</div>
-            <div style="font-size:14px;">كن أول من ينشئ طلب تبادل!</div>
-          </div>
-        `;
+      let filteredOrders = activeExchangeOrders;
+      
+      // تطبيق الفلتر الحالي
+      if (currentFilter === 'sell-dzd') {
+        filteredOrders = activeExchangeOrders.filter(order => order.type === 'sell-dzd' && order.status === 'active');
+      } else if (currentFilter === 'sell-usd') {
+        filteredOrders = activeExchangeOrders.filter(order => order.type === 'sell-usd' && order.status === 'active');
+      } else if (currentFilter === 'my-orders') {
+        filteredOrders = activeExchangeOrders.filter(order => order.userId === currentUser.id.toString());
+      } else {
+        // جميع الطلبات النشطة (باستثناء طلباتي)
+        filteredOrders = activeExchangeOrders.filter(order => order.status === 'active');
+      }
+
+      if (filteredOrders.length === 0) {
+        let message = '';
+        if (currentFilter === 'my-orders') {
+          message = `
+            <div style="text-align:center;padding:40px 20px;color:var(--text-light);">
+              <i class="fas fa-list" style="font-size:48px;margin-bottom:15px;opacity:0.5;"></i>
+              <div style="font-size:16px;margin-bottom:10px;">لا توجد طلبات تبادل خاصة بك</div>
+              <div style="font-size:14px;">قم بإنشاء طلب تبادل جديد!</div>
+            </div>
+          `;
+        } else {
+          message = `
+            <div style="text-align:center;padding:40px 20px;color:var(--text-light);">
+              <i class="fas fa-exchange-alt" style="font-size:48px;margin-bottom:15px;opacity:0.5;"></i>
+              <div style="font-size:16px;margin-bottom:10px;">لا توجد طلبات تبادل حالياً</div>
+              <div style="font-size:14px;">كن أول من ينشئ طلب تبادل!</div>
+            </div>
+          `;
+        }
+        container.innerHTML = message;
         return;
       }
 
-      activeExchangeOrders.forEach(order => {
-        // عرض جميع الطلبات بما فيها طلبات المستخدم الحالي
-        // إذا كنت تريد إخفاء طلبات المستخدم الحالي، أزل الشرط التالي
-        // if (order.userId === currentUser.id.toString()) return;
-        
+      filteredOrders.forEach(order => {
+        const isMyOrder = order.userId === currentUser.id.toString();
         const card = document.createElement('div');
-        card.className = 'exchange-card';
+        card.className = `exchange-card ${isMyOrder ? 'my-order' : ''}`;
         card.setAttribute('data-type', order.type);
         
-        const badgeClass = order.type === 'sell-usd' ? 'sell-usd' : 'sell-dzd';
+        const badgeClass = isMyOrder ? 'my-order' : (order.type === 'sell-usd' ? 'sell-usd' : 'sell-dzd');
         const badgeIcon = order.type === 'sell-usd' ? 'fa-dollar-sign' : 'fa-dinar-sign';
         const currencyIcon = order.type === 'sell-usd' ? 'fa-dollar-sign' : 'fa-dinar-sign';
         
@@ -3326,15 +3374,23 @@
           minute: '2-digit'
         }) : 'الآن';
         
+        const statusText = order.status === 'active' ? 'نشط' : 
+                          order.status === 'pending' ? 'قيد الانتظار' : 
+                          order.status === 'completed' ? 'مكتمل' : 'ملغى';
+        
+        const statusColor = order.status === 'active' ? 'var(--success)' : 
+                           order.status === 'pending' ? 'var(--warning)' : 
+                           order.status === 'completed' ? 'var(--info)' : 'var(--danger)';
+        
         card.innerHTML = `
           <div class="exchange-card-header">
             <div class="exchange-badge ${badgeClass}">
               <i class="fas ${badgeIcon}"></i>
-              ${order.type === 'sell-usd' ? 'بيع دولار' : 'بيع دينار'}
+              ${isMyOrder ? 'طلبك' : (order.type === 'sell-usd' ? 'بيع دولار' : 'بيع دينار')}
             </div>
             <div class="exchange-user-info">
               <div class="exchange-avatar">${order.userName?.charAt(0) || 'م'}</div>
-              <div class="exchange-user-name">${order.userName || 'مستخدم'}</div>
+              <div class="exchange-user-name">${isMyOrder ? 'أنت' : (order.userName || 'مستخدم')}</div>
             </div>
           </div>
           
@@ -3366,7 +3422,7 @@
               </div>
               <div class="exchange-detail-item">
                 <span class="exchange-detail-label">حالة الطلب</span>
-                <span class="exchange-detail-value" style="color: var(--success);">نشط</span>
+                <span class="exchange-detail-value" style="color: ${statusColor};">${statusText}</span>
               </div>
             </div>
             
@@ -3375,37 +3431,48 @@
               <span class="exchange-total-value">${totalDisplay}</span>
             </div>
             
-            <button class="exchange-action-btn" data-id="${order.id}">
-              <i class="fas fa-exchange-alt"></i>
-              استبدال معه
-            </button>
+            ${isMyOrder ? 
+              `<button class="exchange-action-btn cancel" data-id="${order.id}">
+                <i class="fas fa-times"></i>
+                إلغاء الطلب
+              </button>` : 
+              `<button class="exchange-action-btn" data-id="${order.id}">
+                <i class="fas fa-exchange-alt"></i>
+                استبدال معه
+              </button>`
+            }
           </div>
         `;
         
         container.appendChild(card);
       });
 
+      // إعادة إرفاق الأحداث للأزرار
+      attachExchangeEvents();
+    }
+
+    function updateFilterButtons() {
+      document.querySelectorAll('.exchange-filter-btn').forEach(btn => {
+        if (btn.getAttribute('data-filter') === currentFilter) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+    }
+
+    function attachExchangeEvents() {
+      // أحداث أزرار الفلتر
       document.querySelectorAll('.exchange-filter-btn').forEach(button => {
         button.addEventListener('click', function() {
-          document.querySelectorAll('.exchange-filter-btn').forEach(btn => btn.classList.remove('active'));
-          this.classList.add('active');
-          
-          const filter = this.getAttribute('data-filter');
-          const cards = document.querySelectorAll('.exchange-card');
-          
-          cards.forEach(card => {
-            const cardType = card.getAttribute('data-type');
-            
-            if (filter === 'all') {
-              card.style.display = 'flex';
-            } else {
-              card.style.display = cardType === filter ? 'flex' : 'none';
-            }
-          });
+          currentFilter = this.getAttribute('data-filter');
+          updateFilterButtons();
+          renderExchangeCards();
         });
       });
 
-      document.querySelectorAll('.exchange-action-btn').forEach(button => {
+      // أحداث أزرار الاستبدال
+      document.querySelectorAll('.exchange-action-btn:not(.cancel)').forEach(button => {
         button.addEventListener('click', function() {
           const orderId = this.getAttribute('data-id');
           const order = activeExchangeOrders.find(o => o.id == orderId);
@@ -3431,6 +3498,56 @@
           }
         });
       });
+
+      // أحداث أزرار الإلغاء
+      document.querySelectorAll('.exchange-action-btn.cancel').forEach(button => {
+        button.addEventListener('click', function() {
+          const orderId = this.getAttribute('data-id');
+          const order = activeExchangeOrders.find(o => o.id == orderId);
+          
+          if (order && confirm('هل أنت متأكد من رغبتك في إلغاء هذا الطلب؟')) {
+            cancelExchangeOrder(orderId);
+          }
+        });
+      });
+    }
+
+    async function cancelExchangeOrder(orderId) {
+      try {
+        showWalletLoading();
+        
+        if (!db) throw new Error('Firebase غير مهيئ');
+        
+        const orderRef = db.collection('exchange_orders').doc(orderId);
+        const orderDoc = await orderRef.get();
+        
+        if (!orderDoc.exists) {
+          throw new Error('طلب التبادل غير موجود');
+        }
+        
+        const order = orderDoc.data();
+        
+        // إرجاع المبلغ إلى رصيد المستخدم إذا كان الطلب نشطًا
+        if (order.status === 'active') {
+          await updateUserBalance(currentUser.id, order.sellCurrency, order.sellAmount, true);
+        }
+        
+        // تحديث حالة الطلب إلى ملغى
+        await orderRef.update({
+          status: 'cancelled',
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        showToast('✅ تم إلغاء طلب التبادل بنجاح', 'success');
+        
+        return true;
+      } catch (error) {
+        console.error('❌ خطأ في إلغاء طلب التبادل:', error);
+        showToast(`❌ خطأ في إلغاء طلب التبادل: ${error.message}`, 'error');
+        return false;
+      } finally {
+        hideWalletLoading();
+      }
     }
 
     function updateTransactionDetails() {
