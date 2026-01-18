@@ -120,6 +120,7 @@
     }
 
     .wallet-user-meta .sub {
+      display: none; /* إخفاء معرف المستخدم */
       font-size: 11px;
       color: var(--text-light);
       cursor: pointer;
@@ -2736,7 +2737,8 @@
         const fullName = userName + (userLastName ? ' ' + userLastName : '');
         
         document.getElementById('walletUserName').textContent = fullName;
-        document.getElementById('walletUserId').textContent = `id: ${userData.id}`;
+        // تم إخفاء معرف المستخدم هنا
+        // document.getElementById('walletUserId').textContent = `id: ${userData.id}`;
         document.getElementById('walletCoinIcon').textContent = '💰';
         
         document.getElementById('bankUserId').textContent = userData.id;
