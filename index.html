@@ -2712,16 +2712,22 @@
         exchangeUnsubscribe();
       }
       
+      // تم التعديل هنا: إزالة orderBy لأنه كان يسبب مشكلة في العرض
       exchangeUnsubscribe = db.collection('exchange_orders')
         .where('status', '==', 'active')
-        .orderBy('createdAt', 'desc')
         .onSnapshot((snapshot) => {
           activeExchangeOrders = [];
           snapshot.forEach((doc) => {
             const order = doc.data();
+            order.id = doc.id; // التأكد من وجود معرف الطلب
             order.createdAt = order.createdAt?.toDate() || new Date();
             activeExchangeOrders.push(order);
           });
+          
+          // ترتيب الطلبات حسب تاريخ الإنشاء تنازلياً (على جانب العميل)
+          activeExchangeOrders.sort((a, b) => b.createdAt - a.createdAt);
+          
+          console.log(`✅ تم استرجاع ${activeExchangeOrders.length} طلب تبادل نشط`);
           
           renderExchangeCards();
         }, (error) => {
@@ -3294,7 +3300,9 @@
       }
 
       activeExchangeOrders.forEach(order => {
-        if (order.userId === currentUser.id.toString()) return;
+        // عرض جميع الطلبات بما فيها طلبات المستخدم الحالي
+        // إذا كنت تريد إخفاء طلبات المستخدم الحالي، أزل الشرط التالي
+        // if (order.userId === currentUser.id.toString()) return;
         
         const card = document.createElement('div');
         card.className = 'exchange-card';
@@ -3491,10 +3499,217 @@
         return;
       }
       
-      const orderId = await createExchangeOrder(currentUser.id, type, amount, rate);
+      // تحقق من الرصيد
+      let userBalance;
+      let currency;
       
-      if (orderId) {
+      if (type === 'sell-dzd') {
+        currency = 'DZD';
+        userBalance = userBalances['DZD'] || 0;
+      } else {
+        currency = 'USDT';
+        userBalance = userBalances['USDT'] || 0;
+      }
+      
+      if (amount > userBalance) {
+        showToast(`رصيدك غير كافي. لديك ${userBalance.toFixed(2)} ${currency} فقط`, 'error');
+        return;
+      }
+      
+      try {
+        showWalletLoading();
+        
+        if (!db) throw new Error('Firebase غير مهيئ');
+        
+        // خصم المبلغ من رصيد المستخدم
+        await updateUserBalance(currentUser.id, currency, amount, false);
+        
+        const exchangeRef = db.collection('exchange_orders').doc();
+        const exchangeData = {
+          id: exchangeRef.id,
+          userId: currentUser.id.toString(),
+          userName: currentUser.firstName + (currentUser.lastName ? ' ' + currentUser.lastName : ''),
+          type: type,
+          sellAmount: amount,
+          sellCurrency: currency,
+          exchangeRate: rate,
+          status: 'active',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await exchangeRef.set(exchangeData);
+        
+        showToast('✅ تم إنشاء طلب التبادل بنجاح', 'success');
         closeCreateExchangeModal();
+        updateAvailableBalances();
+        
+        return exchangeRef.id;
+      } catch (error) {
+        console.error('❌ خطأ في إنشاء طلب التبادل:', error);
+        showToast(`❌ خطأ في إنشاء طلب التبادل: ${error.message}`, 'error');
+        return null;
+      } finally {
+        hideWalletLoading();
+      }
+    }
+
+    async function executeExchange(orderId, buyerId) {
+      try {
+        showWalletLoading();
+        
+        if (!db) throw new Error('Firebase غير مهيئ');
+        
+        // جلب بيانات طلب التبادل
+        const orderRef = db.collection('exchange_orders').doc(orderId);
+        const orderDoc = await orderRef.get();
+        if (!orderDoc.exists) throw new Error('طلب التبادل غير موجود');
+        
+        const order = orderDoc.data();
+        if (order.status !== 'active') throw new Error('طلب التبادل لم يعد نشطًا');
+        
+        // التحقق من أن المشتري ليس هو البائع
+        if (order.userId === buyerId.toString()) {
+          throw new Error('لا يمكنك تبادل العملات مع نفسك');
+        }
+        
+        // حساب المبالغ
+        let buyerSellAmount, buyerBuyAmount, sellerSellAmount, sellerBuyAmount;
+        if (order.type === 'sell-usd') {
+          // البائع يبيع الدولار ويشتري الدينار، المشتري يشتري الدولار ويبيع الدينار
+          buyerSellAmount = order.sellAmount * order.exchangeRate; // الدينار الذي سيدفعه المشتري
+          buyerBuyAmount = order.sellAmount; // الدولار الذي سيحصل عليه المشتري
+          sellerSellAmount = order.sellAmount; // الدولار الذي يبيعه البائع
+          sellerBuyAmount = buyerSellAmount; // الدينار الذي سيحصل عليه البائع
+        } else {
+          // البائع يبيع الدينار ويشتري الدولار، المشتري يشتري الدينار ويبيع الدولار
+          buyerSellAmount = order.sellAmount / order.exchangeRate; // الدولار الذي سيدفعه المشتري
+          buyerBuyAmount = order.sellAmount; // الدينار الذي سيحصل عليه المشتري
+          sellerSellAmount = order.sellAmount; // الدينار الذي يبيعه البائع
+          sellerBuyAmount = buyerSellAmount; // الدولار الذي سيحصل عليه البائع
+        }
+        
+        // التحقق من رصيد المشتري
+        const buyerData = await getUserFromFirebase(buyerId);
+        if (!buyerData) throw new Error('بيانات المشتري غير موجودة');
+        
+        const buyerBalance = order.type === 'sell-usd' 
+          ? buyerData.balances?.['DZD'] || 0
+          : buyerData.balances?.['USDT'] || 0;
+          
+        if (buyerBalance < buyerSellAmount) {
+          throw new Error(`رصيدك غير كافي لإكمال هذه العملية`);
+        }
+        
+        // بدء معاملة: خصم من المشتري وإضافة للبائع، والعكس
+        if (order.type === 'sell-usd') {
+          // المشتري يشتري دولارًا بيع الدينار
+          // خصم الدينار من المشتري
+          await updateUserBalance(buyerId, 'DZD', buyerSellAmount, false);
+          // إضافة الدينار للبائع
+          await updateUserBalance(order.userId, 'DZD', sellerBuyAmount, true);
+          
+          // إضافة الدولار للمشتري
+          await updateUserBalance(buyerId, 'USDT', buyerBuyAmount, true);
+        } else {
+          // المشتري يشتري دينارًا بيع الدولار
+          // خصم الدولار من المشتري
+          await updateUserBalance(buyerId, 'USDT', buyerSellAmount, false);
+          // إضافة الدولار للبائع
+          await updateUserBalance(order.userId, 'USDT', sellerBuyAmount, true);
+          
+          // إضافة الدينار للمشتري
+          await updateUserBalance(buyerId, 'DZD', buyerBuyAmount, true);
+        }
+        
+        // تحديث حالة طلب التبادل إلى مكتمل
+        await orderRef.update({
+          status: 'completed',
+          buyerId: buyerId,
+          completedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // إنشاء سجل للمعاملة
+        const transactionRef = db.collection('transactions').doc();
+        const transactionData = {
+          id: transactionRef.id,
+          type: 'exchange',
+          orderId: orderId,
+          sellerId: order.userId,
+          buyerId: buyerId,
+          sellAmount: sellerSellAmount,
+          sellCurrency: order.sellCurrency,
+          buyAmount: sellerBuyAmount,
+          buyCurrency: order.type === 'sell-usd' ? 'DZD' : 'USDT',
+          exchangeRate: order.exchangeRate,
+          status: 'completed',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        await transactionRef.set(transactionData);
+        
+        showToast('✅ تمت عملية التبادل بنجاح', 'success');
+        return true;
+      } catch (error) {
+        console.error('❌ خطأ في تنفيذ التبادل:', error);
+        showToast(`❌ خطأ في تنفيذ التبادل: ${error.message}`, 'error');
+        return false;
+      } finally {
+        hideWalletLoading();
+      }
+    }
+
+    async function transferMoney(senderId, recipientId, currency, amount) {
+      try {
+        showWalletLoading();
+        
+        if (!db) throw new Error('Firebase غير مهيئ');
+        
+        // التحقق من أن المرسل لديه رصيد كافي
+        const senderData = await getUserFromFirebase(senderId);
+        if (!senderData) throw new Error('بيانات المرسل غير موجودة');
+        
+        const senderBalance = senderData.balances?.[currency] || 0;
+        if (senderBalance < amount) {
+          throw new Error('الرصيد غير كافي');
+        }
+        
+        // التحقق من وجود المستلم
+        const recipientData = await getUserFromFirebase(recipientId);
+        if (!recipientData) throw new Error('بيانات المستلم غير موجودة');
+        
+        // حساب رسوم التحويل (إذا كانت هناك رسوم)
+        const fees = calculateTransferFees(amount, currency);
+        const totalDeducted = amount + fees;
+        
+        // خصم المبلغ من المرسل (المبلغ + الرسوم)
+        await updateUserBalance(senderId, currency, totalDeducted, false);
+        
+        // إضافة المبلغ للمستلم (بدون الرسوم)
+        await updateUserBalance(recipientId, currency, amount, true);
+        
+        // إنشاء سجل للمعاملة
+        const transactionRef = db.collection('transactions').doc();
+        const transactionData = {
+          id: transactionRef.id,
+          type: 'transfer',
+          senderId: senderId,
+          recipientId: recipientId,
+          amount: amount,
+          currency: currency,
+          fees: fees,
+          status: 'completed',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        await transactionRef.set(transactionData);
+        
+        showToast('✅ تم التحويل بنجاح', 'success');
+        return transactionRef.id;
+      } catch (error) {
+        console.error('❌ خطأ في التحويل:', error);
+        showToast(`❌ خطأ في التحويل: ${error.message}`, 'error');
+        throw error;
+      } finally {
+        hideWalletLoading();
       }
     }
 
