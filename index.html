@@ -1111,21 +1111,124 @@
       box-shadow: 0 4px 12px rgba(46, 204, 113, 0.3);
     }
 
-    .bank-amount-container {
-      position: relative;
+    /* التعديل هنا: إطار المبلغ المحول العريض */
+    .bank-amount-container-wide {
+      display: flex;
+      align-items: center;
+      background: var(--bg-lighter);
+      border: 2px solid var(--border-light);
+      border-radius: 12px;
+      padding: 8px 15px;
+      transition: all 0.3s ease;
+      width: 100%;
+      height: 60px;
     }
 
-    .bank-currency-symbol {
-      position: absolute;
-      left: 18px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-gray);
+    .bank-amount-container-wide:focus-within {
+      border-color: var(--primary);
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(0, 102, 51, 0.15);
+    }
+
+    .bank-currency-display {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      min-width: 80px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0,102,51,0.2);
+      margin-left: 10px;
+    }
+
+    .bank-currency-display[data-currency="USDT"] {
+      background: linear-gradient(to right, #F0B90B, #F0D90B);
+      color: #1E2026;
+      box-shadow: 0 3px 8px rgba(240, 185, 11, 0.2);
+    }
+
+    .bank-amount-input-container {
+      flex: 1;
+    }
+
+    .bank-amount-input {
+      width: 100%;
+      padding: 12px 15px;
+      border: none;
+      background: transparent;
+      font-size: 18px;
       font-weight: 600;
-      background-color: var(--border-light);
-      padding: 4px 8px;
-      border-radius: 6px;
-      font-size: 14px;
+      color: var(--text-dark);
+      text-align: left;
+      direction: ltr;
+    }
+
+    .bank-amount-input:focus {
+      outline: none;
+    }
+
+    .bank-amount-input::placeholder {
+      color: var(--text-light);
+      opacity: 0.7;
+    }
+
+    /* التعديل هنا: إطار رقم العملية العريض بنفس حجم إطار المبلغ المحول */
+    .bank-transaction-container-wide {
+      display: flex;
+      align-items: center;
+      background: var(--bg-lighter);
+      border: 2px solid var(--border-light);
+      border-radius: 12px;
+      padding: 8px 15px;
+      transition: all 0.3s ease;
+      width: 100%;
+      height: 60px;
+    }
+
+    .bank-transaction-container-wide:focus-within {
+      border-color: var(--primary);
+      background-color: white;
+      box-shadow: 0 0 0 3px rgba(0, 102, 51, 0.15);
+    }
+
+    .bank-transaction-label {
+      background: linear-gradient(to right, var(--primary), var(--secondary));
+      color: white;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 16px;
+      min-width: 80px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0,102,51,0.2);
+      margin-left: 10px;
+    }
+
+    .bank-transaction-input-container {
+      flex: 1;
+    }
+
+    .bank-transaction-input {
+      width: 100%;
+      padding: 12px 15px;
+      border: none;
+      background: transparent;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-dark);
+      text-align: right;
+      direction: rtl;
+    }
+
+    .bank-transaction-input:focus {
+      outline: none;
+    }
+
+    .bank-transaction-input::placeholder {
+      color: var(--text-light);
+      opacity: 0.7;
     }
 
     .bank-success-animation {
@@ -1776,6 +1879,64 @@
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(240, 185, 11, 0.3);
     }
+
+    /* التعديل هنا: أزرار اختيار نوع التحويل بنفس حجم أزرار الإجراءات */
+    .bank-type-selector {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .bank-type-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid var(--border-light);
+      background: white;
+      color: var(--text-dark);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .bank-type-btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .bank-type-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 102, 51, 0.2);
+    }
+
+    .bank-type-btn i {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
+    .bank-type-btn[data-type="binance"] {
+      border-color: rgba(240, 185, 11, 0.3);
+    }
+
+    .bank-type-btn[data-type="binance"]:hover {
+      border-color: #F0B90B;
+    }
+
+    .bank-type-btn[data-type="binance"].active {
+      background: linear-gradient(135deg, #F0B90B, #F0D90B);
+      color: #1E2026;
+      border-color: #F0B90B;
+      box-shadow: 0 4px 12px rgba(240, 185, 11, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -2351,30 +2512,39 @@
             </div>
             
             <div class="bank-form-container">
+              <!-- التعديل هنا: تم تغيير select إلى أزرار أيقونات بنفس حجم أزرار الإجراءات -->
               <div class="bank-form-group">
-                <label class="bank-form-label" for="bankTransferType">
+                <label class="bank-form-label">
                   <i class="fas fa-exchange-alt"></i>
                   نوع التحويل
                 </label>
-                <select id="bankTransferType" class="bank-form-select">
-                  <option value="bank">تحويل بنكي (BaridiMob)</option>
-                  <option value="binance">تحويل بينانس</option>
-                  <option value="other">طريقة أخرى</option>
-                </select>
+                <div class="bank-type-selector">
+                  <button type="button" class="bank-type-btn active" data-type="bank">
+                    <i class="fas fa-university"></i>
+                    <span>BaridiMob</span>
+                  </button>
+                  <button type="button" class="bank-type-btn" data-type="binance">
+                    <i class="fab fa-binance"></i>
+                    <span>Binance</span>
+                  </button>
+                </div>
                 <div class="bank-hint">
                   <i class="fas fa-info-circle"></i>
                   اختر طريقة التحويل التي استخدمتها
                 </div>
               </div>
               
+              <!-- التعديل هنا: إطار المبلغ المحول العريض -->
               <div class="bank-form-group">
-                <label class="bank-form-label" for="bankAmount">
+                <label class="bank-form-label">
                   <i class="fas fa-money-bill-wave"></i>
                   المبلغ المحول
                 </label>
-                <div class="bank-amount-container">
-                  <input type="number" id="bankAmount" class="bank-form-input" placeholder="0.00" step="0.01" min="1">
-                  <div class="bank-currency-symbol" id="bankCurrencySymbol">DZD</div>
+                <div class="bank-amount-container-wide">
+                  <div class="bank-currency-display" id="bankCurrencyDisplay">DZD</div>
+                  <div class="bank-amount-input-container">
+                    <input type="number" id="bankAmount" class="bank-amount-input" placeholder="0.00" step="0.01" min="1">
+                  </div>
                 </div>
                 <div class="bank-hint">
                   <i class="fas fa-info-circle"></i>
@@ -2382,12 +2552,18 @@
                 </div>
               </div>
               
+              <!-- التعديل هنا: إطار رقم العملية العريض بنفس حجم إطار المبلغ المحول -->
               <div class="bank-form-group">
-                <label class="bank-form-label" for="bankTransactionNumber">
+                <label class="bank-form-label">
                   <i class="fas fa-receipt"></i>
                   رقم العملية أو المرجع
                 </label>
-                <input type="text" id="bankTransactionNumber" class="bank-form-input" placeholder="أدخل رقم العملية كما في الإشعار">
+                <div class="bank-transaction-container-wide">
+                  <div class="bank-transaction-label">رقم</div>
+                  <div class="bank-transaction-input-container">
+                    <input type="text" id="bankTransactionNumber" class="bank-transaction-input" placeholder="أدخل رقم العملية كما في الإشعار">
+                  </div>
+                </div>
                 <div class="bank-hint">
                   <i class="fas fa-info-circle"></i>
                   يمكنك العثور على رقم العملية في إشعار البنك أو تطبيق التحويل
@@ -4138,8 +4314,30 @@
       }, 3000);
     }
 
+    // ========== تحديث ملخص طلب الإيداع مع الأزرار الجديدة ==========
+    function updateDepositSummary() {
+      const amount = document.getElementById('bankAmount').value;
+      const activeTypeBtn = document.querySelector('.bank-type-btn.active');
+      const type = activeTypeBtn ? activeTypeBtn.dataset.type : 'bank';
+      const transactionNumber = document.getElementById('bankTransactionNumber').value;
+      
+      if (amount && transactionNumber) {
+        const currency = type === 'binance' ? 'USDT' : 'DZD';
+        document.getElementById('summaryAmount').textContent = 
+          `${parseFloat(amount).toLocaleString()} ${currency}`;
+        
+        const methodText = type === 'bank' ? 'BaridiMob' : 'Binance (USDT)';
+        
+        document.getElementById('summaryMethod').textContent = methodText;
+        document.getElementById('summaryTransaction').textContent = transactionNumber;
+        document.getElementById('depositSummary').style.display = 'block';
+      }
+    }
+
+    // ========== معالجة طلب الإيداع مع الأزرار الجديدة ==========
     async function processBankTransfer() {
-      const transferType = document.getElementById('bankTransferType').value;
+      const activeTypeBtn = document.querySelector('.bank-type-btn.active');
+      const transferType = activeTypeBtn ? activeTypeBtn.dataset.type : 'bank';
       const transactionNumber = document.getElementById('bankTransactionNumber').value.trim();
       const amountInput = document.getElementById('bankAmount').value.trim();
       
@@ -4205,6 +4403,19 @@
       } finally {
         hideWalletLoading();
       }
+    }
+
+    // ========== تحديث عرض العملة في الإطار العريض ==========
+    function updateBankCurrencyDisplay() {
+      const activeTypeBtn = document.querySelector('.bank-type-btn.active');
+      const currency = activeTypeBtn && activeTypeBtn.dataset.type === 'binance' ? 'USDT' : 'DZD';
+      const currencyDisplay = document.getElementById('bankCurrencyDisplay');
+      
+      currencyDisplay.textContent = currency;
+      currencyDisplay.setAttribute('data-currency', currency);
+      
+      document.getElementById('bankCurrencyHint').textContent = 
+        `أدخل المبلغ بال${currency === 'DZD' ? 'دينار الجزائري' : 'USDT (تيثر)'}`;
     }
 
     function initializeBankCopyButtons() {
@@ -4278,26 +4489,6 @@
             showBankNotification('فشل في نسخ النص، يرجى المحاولة مرة أخرى', true);
           });
       });
-    }
-
-    // ========== تحديث ملخص طلب الإيداع ==========
-    function updateDepositSummary() {
-      const amount = document.getElementById('bankAmount').value;
-      const type = document.getElementById('bankTransferType').value;
-      const transactionNumber = document.getElementById('bankTransactionNumber').value;
-      
-      if (amount && transactionNumber) {
-        const currency = type === 'binance' ? 'USDT' : 'DZD';
-        document.getElementById('summaryAmount').textContent = 
-          `${parseFloat(amount).toLocaleString()} ${currency}`;
-        
-        const methodText = type === 'bank' ? 'تحويل بنكي' : 
-                          type === 'binance' ? 'بينانس (USDT)' : 'طريقة أخرى';
-        
-        document.getElementById('summaryMethod').textContent = methodText;
-        document.getElementById('summaryTransaction').textContent = transactionNumber;
-        document.getElementById('depositSummary').style.display = 'block';
-      }
     }
 
     // ========== تهيئة الأحداث ==========
@@ -4451,17 +4642,24 @@
       document.getElementById('bankSubmitBtn').addEventListener('click', processBankTransfer);
       initializeBankCopyButtons();
       
-      // أحداث تحديث ملخص الإيداع
-      document.getElementById('bankTransferType').addEventListener('change', function() {
-        const currency = this.value === 'binance' ? 'USDT' : 'DZD';
-        document.getElementById('bankCurrencySymbol').textContent = currency;
-        document.getElementById('bankCurrencyHint').textContent = 
-          `أدخل المبلغ بال${currency === 'DZD' ? 'دينار الجزائري' : 'USDT (تيثر)'}`;
-        updateDepositSummary();
+      // أحداث الأزرار الجديدة لنوع التحويل
+      document.querySelectorAll('.bank-type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.bank-type-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          
+          // تحديث عرض العملة في الإطار العريض
+          updateBankCurrencyDisplay();
+          updateDepositSummary();
+        });
       });
       
+      // تحديث أحداث تحديث ملخص الإيداع
       document.getElementById('bankAmount').addEventListener('input', updateDepositSummary);
       document.getElementById('bankTransactionNumber').addEventListener('input', updateDepositSummary);
+      
+      // تهيئة عرض العملة الافتراضي عند التحميل
+      updateBankCurrencyDisplay();
       
       // تنظيف دوري للمعاملات القديمة
       setInterval(() => {
