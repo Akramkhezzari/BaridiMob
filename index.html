@@ -1937,73 +1937,11 @@
       border-color: #F0B90B;
       box-shadow: 0 4px 12px rgba(240, 185, 11, 0.2);
     }
-
-    /* شاشة الحماية */
-    .protection-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      z-index: 9999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .protection-logo {
-      font-size: 48px;
-      margin-bottom: 20px;
-    }
-
-    .protection-message {
-      font-size: 24px;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-
-    .protection-submessage {
-      font-size: 16px;
-      margin-bottom: 30px;
-      opacity: 0.9;
-    }
-
-    .protection-button {
-      background: rgba(255, 255, 255, 0.2);
-      border: 2px solid rgba(255, 255, 255, 0.3);
-      color: white;
-      padding: 12px 30px;
-      border-radius: 50px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-block;
-    }
-
-    .protection-button:hover {
-      background: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
-    }
   </style>
 </head>
 <body>
-  <!-- شاشة الحماية -->
-  <div class="protection-screen" id="protectionScreen">
-    <div class="protection-logo">🚫</div>
-    <div class="protection-message">غير مسموح بالوصول</div>
-    <div class="protection-submessage">هذا التطبيق يعمل فقط داخل تطبيق Telegram</div>
-    <a href="https://t.me/Baridi_Mob_dz" class="protection-button">فتح في Telegram</a>
-  </div>
-
   <!-- صفحة المحفظة الرئيسية -->
-  <div class="wallet-page" id="walletPage" style="display: none;">
+  <div class="wallet-page">
     <div class="wallet-frame">
       <div class="wallet-header">
         <div class="wallet-brand">
@@ -2122,8 +2060,8 @@
             <div class="form-group">
               <label class="form-label">اختر العملة</label>
               <div class="currency-options">
-                <button class="currency-btn active" data-currency="DZD">الدينار الجزائري (دج)</button>
-                <button class="currency-btn usd" data-currency="USD">الدولار الأمريكي ($)</button>
+                <button class="currency-btn active" data-currency="DZD">الدينار الجزائري</button>
+                <button class="currency-btn usd" data-currency="USDT">الدولار الأمريكي</button>
               </div>
             </div>
             
@@ -2248,7 +2186,7 @@
           <div class="form-group">
             <label class="form-label">عملة السحب</label>
             <div class="currency-options">
-              <button class="currency-btn usd active" data-withdraw-currency="USD">الدولار الأمريكي ($)</button>
+              <button class="currency-btn usd active" data-withdraw-currency="USDT">الدولار الأمريكي (USDT)</button>
             </div>
           </div>
           
@@ -2260,7 +2198,7 @@
             </div>
             <div class="withdraw-fees-info">
               <i class="fas fa-info-circle"></i>
-              الحد الأدنى للسحب: <span id="withdrawMinAmount">10 $</span> | رسوم السحب: <span id="withdrawFeeAmount">1 $</span>
+              الحد الأدنى للسحب: <span id="withdrawMinAmount">10 USDT</span> | رسوم السحب: <span id="withdrawFeeAmount">1 USDT</span>
             </div>
           </div>
           
@@ -2278,7 +2216,7 @@
           
           <div class="available-balance-display">
             <span class="balance-label">المبلغ الذي سيتم استلامه:</span>
-            <span class="balance-amount" id="withdrawReceiveAmount">0.00 $</span>
+            <span class="balance-amount" id="withdrawReceiveAmount">0.00 USDT</span>
           </div>
         </div>
         
@@ -2676,137 +2614,6 @@
   </div>
 
   <script>
-    // ========== نظام حماية فتح التطبيق داخل Telegram فقط ==========
-    (function() {
-      // التحقق من أن التطبيق يعمل داخل Telegram WebApp
-      function isTelegramWebApp() {
-        // التحقق 1: وجود Telegram WebApp SDK
-        if (!window.Telegram || !window.Telegram.WebApp) {
-          console.log('❌ Telegram WebApp SDK غير موجود');
-          return false;
-        }
-        
-        // التحقق 2: وجود initData (البيانات الأساسية من Telegram)
-        if (!Telegram.WebApp.initData || Telegram.WebApp.initData.length < 10) {
-          console.log('❌ لا توجد بيانات صالحة من Telegram');
-          return false;
-        }
-        
-        // التحقق 3: التحقق من platform
-        const validPlatforms = ['tdesktop', 'android', 'ios', 'web', 'weba', 'macos'];
-        if (!validPlatforms.includes(Telegram.WebApp.platform)) {
-          console.log('❌ نظام غير معترف به:', Telegram.WebApp.platform);
-          return false;
-        }
-        
-        // التحقق 4: التحقق من user agent
-        const userAgent = navigator.userAgent.toLowerCase();
-        const isTelegramWebView = userAgent.includes('telegram') || 
-                                  userAgent.includes('webview') ||
-                                  userAgent.includes('tweb');
-        
-        if (!isTelegramWebView && Telegram.WebApp.platform === 'web') {
-          console.log('❌ ليس داخل WebView الخاص بـ Telegram');
-          return false;
-        }
-        
-        // التحقق 5: التحقق من initDataUnsafe (بيانات المستخدم)
-        if (!Telegram.WebApp.initDataUnsafe || !Telegram.WebApp.initDataUnsafe.user) {
-          console.log('❌ بيانات المستخدم غير متوفرة');
-          return false;
-        }
-        
-        // التحقق 6: التحقق من timestamp
-        try {
-          const initData = new URLSearchParams(Telegram.WebApp.initData);
-          const authDate = parseInt(initData.get('auth_date'));
-          const now = Math.floor(Date.now() / 1000);
-          
-          // إذا كانت البيانات أقدم من 24 ساعة
-          if (now - authDate > 86400) {
-            console.log('❌ البيانات منتهية الصلاحية');
-            return false;
-          }
-        } catch (error) {
-          console.log('❌ خطأ في تحليل بيانات Telegram');
-          return false;
-        }
-        
-        return true;
-      }
-      
-      // التحقق وإظهار الشاشة المناسبة
-      if (isTelegramWebApp()) {
-        console.log('✅ التطبيق يعمل داخل Telegram WebApp');
-        document.getElementById('protectionScreen').style.display = 'none';
-        document.getElementById('walletPage').style.display = 'block';
-      } else {
-        console.log('🚫 غير مصرح بالفتح خارج Telegram');
-        document.getElementById('protectionScreen').style.display = 'flex';
-        document.getElementById('walletPage').style.display = 'none';
-        
-        // منع أي محاولات للتجاوز
-        document.addEventListener('keydown', function(e) {
-          // منع F12 و Ctrl+Shift+I و Ctrl+Shift+J و Ctrl+U
-          if (e.key === 'F12' || 
-              (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
-              (e.ctrlKey && e.key === 'U')) {
-            e.preventDefault();
-            return false;
-          }
-        });
-        
-        // منع فتح Developer Tools
-        setInterval(function() {
-          const startTime = performance.now();
-          debugger;
-          const endTime = performance.now();
-          
-          if (endTime - startTime > 100) {
-            window.location.href = 'https://t.me/Baridi_Mob_dz';
-          }
-        }, 1000);
-        
-        // منع النقر الأيمن
-        document.addEventListener('contextmenu', function(e) {
-          e.preventDefault();
-          return false;
-        });
-        
-        // منع سحب الملفات
-        document.addEventListener('dragstart', function(e) {
-          e.preventDefault();
-          return false;
-        });
-        
-        // منع النسخ
-        document.addEventListener('copy', function(e) {
-          e.preventDefault();
-          return false;
-        });
-        
-        // منع اللصق
-        document.addEventListener('paste', function(e) {
-          e.preventDefault();
-          return false;
-        });
-        
-        // منع القص
-        document.addEventListener('cut', function(e) {
-          e.preventDefault();
-          return false;
-        });
-        
-        // إعادة التوجيه بعد 5 ثواني
-        setTimeout(function() {
-          window.location.href = 'https://t.me/Baridi_Mob_dz';
-        }, 5000);
-        
-        // لا نكمل تنفيذ باقي الكود
-        return;
-      }
-    })();
-
     // ========== تهيئة Firebase ==========
     const firebaseConfig = {
       apiKey: "AIzaSyBX8v0qIVjG-Z46fVDeEUDKcPxa_FQF9Qc",
@@ -2995,14 +2802,14 @@
 
     // ========== بيانات السحب ==========
     let withdrawData = {
-      currency: 'USD', // الآن فقط الدولار
+      currency: 'USDT', // الآن فقط الدولار
       amount: 0,
       binanceId: '',
       fees: {
-        'USD': 0.00
+        'USDT': 0.00
       },
       minAmounts: {
-        'USD': 0.00
+        'USDT': 0.00
       }
     };
 
@@ -3392,13 +3199,13 @@
     }
 
     function updateWithdrawBalances() {
-      document.getElementById('withdrawAvailableUSD').textContent = `${userBalances['USDT'].toFixed(2)} $`;
+      document.getElementById('withdrawAvailableUSD').textContent = `${userBalances['USDT'].toFixed(2)} USDT`;
     }
 
     function updateWithdrawFeesDisplay() {
       const currency = withdrawData.currency;
-      document.getElementById('withdrawMinAmount').textContent = `${withdrawData.minAmounts[currency]} $`;
-      document.getElementById('withdrawFeeAmount').textContent = `${withdrawData.fees[currency]} $`;
+      document.getElementById('withdrawMinAmount').textContent = `${withdrawData.minAmounts[currency]} USDT`;
+      document.getElementById('withdrawFeeAmount').textContent = `${withdrawData.fees[currency]} USDT`;
     }
 
     function calculateWithdrawReceiveAmount() {
@@ -3408,7 +3215,7 @@
       const receiveAmount = amount - fee;
       
       document.getElementById('withdrawReceiveAmount').textContent = 
-        `${receiveAmount > 0 ? receiveAmount.toFixed(2) : '0.00'} $`;
+        `${receiveAmount > 0 ? receiveAmount.toFixed(2) : '0.00'} USDT`;
     }
 
     function validateWithdrawForm() {
@@ -3432,7 +3239,7 @@
       }
       
       if (amount < minAmount) {
-        showWithdrawError(`الحد الأدنى للسحب هو ${minAmount} $`);
+        showWithdrawError(`الحد الأدنى للسحب هو ${minAmount} USDT`);
         return false;
       }
       
@@ -3455,16 +3262,16 @@
       const receiveAmount = withdrawData.amount - fee;
       const totalAmount = withdrawData.amount + fee;
       
-      document.getElementById('summaryWithdrawAmount').textContent = `${withdrawData.amount.toFixed(2)} $`;
-      document.getElementById('summaryWithdrawFee').textContent = `${fee.toFixed(2)} $`;
-      document.getElementById('summaryWithdrawReceive').textContent = `${receiveAmount.toFixed(2)} $`;
+      document.getElementById('summaryWithdrawAmount').textContent = `${withdrawData.amount.toFixed(2)} USDT`;
+      document.getElementById('summaryWithdrawFee').textContent = `${fee.toFixed(2)} USDT`;
+      document.getElementById('summaryWithdrawReceive').textContent = `${receiveAmount.toFixed(2)} USDT`;
       document.getElementById('summaryBinanceId').textContent = withdrawData.binanceId;
-      document.getElementById('summaryWithdrawTotal').textContent = `${totalAmount.toFixed(2)} $`;
+      document.getElementById('summaryWithdrawTotal').textContent = `${totalAmount.toFixed(2)} USDT`;
       
       document.getElementById('withdrawSummary').style.display = 'block';
       document.getElementById('withdrawPreviewBtn').style.display = 'none';
       document.getElementById('withdrawSubmitBtn').style.display = 'flex';
-      document.getElementById('withdrawEditBtn').style.display = 'none';
+      document.getElementById('withdrawEditBtn').style.display = 'flex';
       
       hideWithdrawAlerts();
     }
@@ -3517,7 +3324,7 @@
       
       document.getElementById('withdrawAmount').value = '';
       document.getElementById('withdrawBinanceId').value = '';
-      document.getElementById('withdrawReceiveAmount').textContent = '0.00 $';
+      document.getElementById('withdrawReceiveAmount').textContent = '0.00 USDT';
       
       document.getElementById('withdrawSummary').style.display = 'none';
       document.getElementById('withdrawSuccessScreen').style.display = 'none';
@@ -3562,17 +3369,29 @@
     }
 
     function updateTransferBalanceDisplay() {
-      const currencySymbol = transferData.currency === 'DZD' ? 'دج' : '$';
-      const balance = userBalances[transferData.currency] || 0;
-      const balanceText = `${balance.toFixed(2)} ${currencySymbol}`;
+      const currency = transferData.currency;
+      const balance = userBalances[currency] || 0;
+      let balanceText = '';
+      
+      if (currency === 'DZD') {
+        balanceText = `${balance.toFixed(2)} دج`;
+      } else if (currency === 'USDT') {
+        balanceText = `${balance.toFixed(2)} USDT`;
+      }
       
       document.getElementById('transferAvailableBalance').textContent = balanceText;
     }
 
     function updateStep2BalanceDisplay() {
-      const currencySymbol = transferData.currency === 'DZD' ? 'دج' : '$';
-      const balance = userBalances[transferData.currency] || 0;
-      const balanceText = `${balance.toFixed(2)} ${currencySymbol}`;
+      const currency = transferData.currency;
+      const balance = userBalances[currency] || 0;
+      let balanceText = '';
+      
+      if (currency === 'DZD') {
+        balanceText = `${balance.toFixed(2)} دج`;
+      } else if (currency === 'USDT') {
+        balanceText = `${balance.toFixed(2)} USDT`;
+      }
       
       document.getElementById('step2AvailableBalance').textContent = balanceText;
     }
@@ -3717,9 +3536,17 @@
 
     function validateTransferStep2() {
       const amount = parseFloat(document.getElementById('transferAmount').value) || 0;
-      const minAmount = transferData.currency === 'DZD' ? 10 : 1;
-      const maxAmount = transferData.currency === 'DZD' ? 50000 : 1000;
-      const userBalance = userBalances[transferData.currency] || 0;
+      let minAmount, maxAmount, userBalance;
+      
+      if (transferData.currency === 'DZD') {
+        minAmount = 10;
+        maxAmount = 50000;
+        userBalance = userBalances['DZD'] || 0;
+      } else if (transferData.currency === 'USDT') {
+        minAmount = 1;
+        maxAmount = 1000;
+        userBalance = userBalances['USDT'] || 0;
+      }
       
       if (!amount || amount <= 0) {
         showTransferError('يرجى إدخال مبلغ صحيح');
@@ -3727,12 +3554,12 @@
       }
       
       if (amount < minAmount) {
-        showTransferError(`الحد الأدنى للإرسال هو ${minAmount} ${transferData.currency === 'DZD' ? 'دج' : '$'}`);
+        showTransferError(`الحد الأدنى للإرسال هو ${minAmount} ${transferData.currency === 'DZD' ? 'دج' : 'USDT'}`);
         return false;
       }
       
       if (amount > maxAmount) {
-        showTransferError(`الحد الأقصى للإرسال هو ${maxAmount} ${transferData.currency === 'DZD' ? 'دج' : '$'}`);
+        showTransferError(`الحد الأقصى للإرسال هو ${maxAmount} ${transferData.currency === 'DZD' ? 'دج' : 'USDT'}`);
         return false;
       }
       
@@ -3750,21 +3577,30 @@
       document.getElementById('confirmRecipientName').textContent = transferData.recipient.name;
       document.getElementById('confirmRecipientId').textContent = transferData.recipient.id;
       
-      const currencySymbol = transferData.currency === 'DZD' ? 'دج' : '$';
-      const fees = calculateTransferFees(transferData.amount, transferData.currency);
-      const total = transferData.amount + fees;
+      let currencyDisplay, fees, total;
       
-      document.getElementById('confirmAmount').textContent = `${transferData.amount.toFixed(2)} ${currencySymbol}`;
-      document.getElementById('confirmFees').textContent = `${fees.toFixed(2)} ${currencySymbol}`;
-      document.getElementById('confirmTotal').textContent = `${total.toFixed(2)} ${currencySymbol}`;
+      if (transferData.currency === 'DZD') {
+        currencyDisplay = 'دج';
+        fees = calculateTransferFees(transferData.amount, transferData.currency);
+        total = transferData.amount + fees;
+      } else if (transferData.currency === 'USDT') {
+        currencyDisplay = 'USDT';
+        fees = calculateTransferFees(transferData.amount, transferData.currency);
+        total = transferData.amount + fees;
+      }
+      
+      document.getElementById('confirmAmount').textContent = `${transferData.amount.toFixed(2)} ${currencyDisplay}`;
+      document.getElementById('confirmFees').textContent = `${fees.toFixed(2)} ${currencyDisplay}`;
+      document.getElementById('confirmTotal').textContent = `${total.toFixed(2)} ${currencyDisplay}`;
     }
 
     function calculateTransferFees(amount, currency) {
       if (currency === 'DZD') {
         return amount <= 10000 ? 50 : 100;
-      } else {
+      } else if (currency === 'USDT') {
         return amount <= 100 ? 1 : 2;
       }
+      return 0;
     }
 
     async function confirmTransfer() {
@@ -3824,8 +3660,10 @@
             timeStyle: 'short'
           });
           
+          let currencyDisplay = transferData.currency === 'DZD' ? 'دج' : 'USDT';
+          
           document.getElementById('transferSuccessMessage').innerHTML = `
-            تم إرسال <strong>${transferData.amount.toFixed(2)} ${transferData.currency === 'DZD' ? 'دج' : '$'}</strong> بنجاح إلى <strong>${transferData.recipient.name}</strong>.<br>
+            تم إرسال <strong>${transferData.amount.toFixed(2)} ${currencyDisplay}</strong> بنجاح إلى <strong>${transferData.recipient.name}</strong>.<br>
             ستظهر المعاملة في سجل المعاملات خلال بضع دقائق.
           `;
           
@@ -4687,12 +4525,6 @@
     // ========== تهيئة الأحداث ==========
     document.addEventListener('DOMContentLoaded', async function() {
       console.log('🚀 تهيئة المحفظة الرقمية...');
-      
-      // التحقق من أننا داخل Telegram
-      if (document.getElementById('protectionScreen').style.display === 'flex') {
-        console.log('🚫 التطبيق مغلق بسبب محاولة فتحه خارج Telegram');
-        return;
-      }
       
       let mockUser = null;
       
