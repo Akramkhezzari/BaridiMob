@@ -1937,11 +1937,73 @@
       border-color: #F0B90B;
       box-shadow: 0 4px 12px rgba(240, 185, 11, 0.2);
     }
+
+    /* شاشة الحماية */
+    .protection-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .protection-logo {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .protection-message {
+      font-size: 24px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .protection-submessage {
+      font-size: 16px;
+      margin-bottom: 30px;
+      opacity: 0.9;
+    }
+
+    .protection-button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 12px 30px;
+      border-radius: 50px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .protection-button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
+  <!-- شاشة الحماية -->
+  <div class="protection-screen" id="protectionScreen">
+    <div class="protection-logo">🚫</div>
+    <div class="protection-message">غير مسموح بالوصول</div>
+    <div class="protection-submessage">هذا التطبيق يعمل فقط داخل تطبيق Telegram</div>
+    <a href="https://t.me/Baridi_Mob_dz" class="protection-button">فتح في Telegram</a>
+  </div>
+
   <!-- صفحة المحفظة الرئيسية -->
-  <div class="wallet-page">
+  <div class="wallet-page" id="walletPage" style="display: none;">
     <div class="wallet-frame">
       <div class="wallet-header">
         <div class="wallet-brand">
@@ -2614,6 +2676,137 @@
   </div>
 
   <script>
+    // ========== نظام حماية فتح التطبيق داخل Telegram فقط ==========
+    (function() {
+      // التحقق من أن التطبيق يعمل داخل Telegram WebApp
+      function isTelegramWebApp() {
+        // التحقق 1: وجود Telegram WebApp SDK
+        if (!window.Telegram || !window.Telegram.WebApp) {
+          console.log('❌ Telegram WebApp SDK غير موجود');
+          return false;
+        }
+        
+        // التحقق 2: وجود initData (البيانات الأساسية من Telegram)
+        if (!Telegram.WebApp.initData || Telegram.WebApp.initData.length < 10) {
+          console.log('❌ لا توجد بيانات صالحة من Telegram');
+          return false;
+        }
+        
+        // التحقق 3: التحقق من platform
+        const validPlatforms = ['tdesktop', 'android', 'ios', 'web', 'weba', 'macos'];
+        if (!validPlatforms.includes(Telegram.WebApp.platform)) {
+          console.log('❌ نظام غير معترف به:', Telegram.WebApp.platform);
+          return false;
+        }
+        
+        // التحقق 4: التحقق من user agent
+        const userAgent = navigator.userAgent.toLowerCase();
+        const isTelegramWebView = userAgent.includes('telegram') || 
+                                  userAgent.includes('webview') ||
+                                  userAgent.includes('tweb');
+        
+        if (!isTelegramWebView && Telegram.WebApp.platform === 'web') {
+          console.log('❌ ليس داخل WebView الخاص بـ Telegram');
+          return false;
+        }
+        
+        // التحقق 5: التحقق من initDataUnsafe (بيانات المستخدم)
+        if (!Telegram.WebApp.initDataUnsafe || !Telegram.WebApp.initDataUnsafe.user) {
+          console.log('❌ بيانات المستخدم غير متوفرة');
+          return false;
+        }
+        
+        // التحقق 6: التحقق من timestamp
+        try {
+          const initData = new URLSearchParams(Telegram.WebApp.initData);
+          const authDate = parseInt(initData.get('auth_date'));
+          const now = Math.floor(Date.now() / 1000);
+          
+          // إذا كانت البيانات أقدم من 24 ساعة
+          if (now - authDate > 86400) {
+            console.log('❌ البيانات منتهية الصلاحية');
+            return false;
+          }
+        } catch (error) {
+          console.log('❌ خطأ في تحليل بيانات Telegram');
+          return false;
+        }
+        
+        return true;
+      }
+      
+      // التحقق وإظهار الشاشة المناسبة
+      if (isTelegramWebApp()) {
+        console.log('✅ التطبيق يعمل داخل Telegram WebApp');
+        document.getElementById('protectionScreen').style.display = 'none';
+        document.getElementById('walletPage').style.display = 'block';
+      } else {
+        console.log('🚫 غير مصرح بالفتح خارج Telegram');
+        document.getElementById('protectionScreen').style.display = 'flex';
+        document.getElementById('walletPage').style.display = 'none';
+        
+        // منع أي محاولات للتجاوز
+        document.addEventListener('keydown', function(e) {
+          // منع F12 و Ctrl+Shift+I و Ctrl+Shift+J و Ctrl+U
+          if (e.key === 'F12' || 
+              (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+              (e.ctrlKey && e.key === 'U')) {
+            e.preventDefault();
+            return false;
+          }
+        });
+        
+        // منع فتح Developer Tools
+        setInterval(function() {
+          const startTime = performance.now();
+          debugger;
+          const endTime = performance.now();
+          
+          if (endTime - startTime > 100) {
+            window.location.href = 'https://t.me/Baridi_Mob_dz';
+          }
+        }, 1000);
+        
+        // منع النقر الأيمن
+        document.addEventListener('contextmenu', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // منع سحب الملفات
+        document.addEventListener('dragstart', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // منع النسخ
+        document.addEventListener('copy', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // منع اللصق
+        document.addEventListener('paste', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // منع القص
+        document.addEventListener('cut', function(e) {
+          e.preventDefault();
+          return false;
+        });
+        
+        // إعادة التوجيه بعد 5 ثواني
+        setTimeout(function() {
+          window.location.href = 'https://t.me/Baridi_Mob_dz';
+        }, 5000);
+        
+        // لا نكمل تنفيذ باقي الكود
+        return;
+      }
+    })();
+
     // ========== تهيئة Firebase ==========
     const firebaseConfig = {
       apiKey: "AIzaSyBX8v0qIVjG-Z46fVDeEUDKcPxa_FQF9Qc",
@@ -3271,7 +3464,7 @@
       document.getElementById('withdrawSummary').style.display = 'block';
       document.getElementById('withdrawPreviewBtn').style.display = 'none';
       document.getElementById('withdrawSubmitBtn').style.display = 'flex';
-      document.getElementById('withdrawEditBtn').style.display = 'flex';
+      document.getElementById('withdrawEditBtn').style.display = 'none';
       
       hideWithdrawAlerts();
     }
@@ -4494,6 +4687,12 @@
     // ========== تهيئة الأحداث ==========
     document.addEventListener('DOMContentLoaded', async function() {
       console.log('🚀 تهيئة المحفظة الرقمية...');
+      
+      // التحقق من أننا داخل Telegram
+      if (document.getElementById('protectionScreen').style.display === 'flex') {
+        console.log('🚫 التطبيق مغلق بسبب محاولة فتحه خارج Telegram');
+        return;
+      }
       
       let mockUser = null;
       
