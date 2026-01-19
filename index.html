@@ -2561,7 +2561,7 @@
                 <div class="bank-transaction-container-wide">
                   <div class="bank-transaction-label">رقم</div>
                   <div class="bank-transaction-input-container">
-                    <input type="text" id="bankTransactionNumber" class="bank-transaction-input" placeholder="أدخل رقم العملية كما في الإشعار">
+                    <input type="text" id="bankTransactionNumber" class="bank-transaction-input" placeholder="أدخل رقم العملية  ">
                   </div>
                 </div>
                 <div class="bank-hint">
@@ -4415,11 +4415,11 @@
       currencyDisplay.setAttribute('data-currency', currency);
       
       document.getElementById('bankCurrencyHint').textContent = 
-        `أدخل المبلغ بال${currency === 'DZD' ? 'دينار الجزائري' : 'USDT (تيثر)'}`;
+        `أدخل المبلغ بال${currency === 'DZD' ? 'دينار الجزائري' : 'دولار الأمريكي'}`;
     }
 
     function initializeBankCopyButtons() {
-      const accountValue = '079999900238685859563';
+      const accountValue = '0799999002385412178';
       const binanceValue = '1143951718';
       
       document.getElementById('bankCopyIdBtn').addEventListener('click', function() {
