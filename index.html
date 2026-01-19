@@ -2495,6 +2495,11 @@
     let userUnsubscribe = null;
     let exchangeUnsubscribe = null;
 
+    // ========== نظام منع التكرار ==========
+    let processingExchange = false; // حالة لمنع النقر المتكرر
+    let completedExchanges = new Set(); // مجموعة لتخزين المعرفات المكتملة
+    let userTransactionCache = new Map(); // كاش لتخزين آخر معاملة لكل مستخدم وطلب
+
     // ========== بيانات السحب ==========
     let withdrawData = {
       currency: 'USD', // الآن فقط الدولار
@@ -2561,6 +2566,10 @@
       const prefix = 'WDR-';
       const randomNum = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
       return prefix + randomNum;
+    }
+
+    function generateTransactionKey(userId, orderId) {
+      return `${userId}_${orderId}`;
     }
 
     // ========== دوال Firebase ==========
@@ -3625,16 +3634,70 @@
     }
 
     async function processExchange() {
+      // التحقق من أن العملية ليست قيد التنفيذ بالفعل
+      if (processingExchange) {
+        showToast('⚠️ جاري معالجة طلبك السابق، يرجى الانتظار...', 'warning');
+        return;
+      }
+      
       if (!currentExchangeOrderId) {
         showToast('❌ لم يتم تحديد طلب تبادل', 'error');
         return;
       }
       
-      const success = await executeExchange(currentExchangeOrderId, currentUser.id);
-      
-      if (success) {
+      // التحقق من أن هذه المعاملة لم تكتمل بالفعل
+      const transactionKey = generateTransactionKey(currentUser.id, currentExchangeOrderId);
+      if (completedExchanges.has(transactionKey)) {
+        showToast('⚠️ تم تنفيذ هذه العملية مسبقاً', 'warning');
         document.getElementById('exchangeDialog').style.display = 'none';
         currentExchangeOrderId = null;
+        return;
+      }
+      
+      // التحقق من الكاش
+      if (userTransactionCache.has(transactionKey)) {
+        const lastTransaction = userTransactionCache.get(transactionKey);
+        const now = Date.now();
+        // إذا كانت العملية السابقة منذ أقل من 10 ثواني
+        if (now - lastTransaction < 10000) {
+          showToast('⚠️ تم تنفيذ عملية مماثلة مؤخراً، يرجى الانتظار 10 ثوان', 'warning');
+          return;
+        }
+      }
+      
+      // تعيين حالة المعالجة
+      processingExchange = true;
+      const confirmBtn = document.getElementById('exchangeDialogConfirm');
+      confirmBtn.disabled = true;
+      confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المعالجة...';
+      
+      try {
+        const success = await executeExchange(currentExchangeOrderId, currentUser.id);
+        
+        if (success) {
+          // إضافة المعرف إلى مجموعة المعاملات المكتملة
+          completedExchanges.add(transactionKey);
+          
+          // تحديث الكاش
+          userTransactionCache.set(transactionKey, Date.now());
+          
+          // تنظيف الكاش بعد 10 دقائق لمنع تراكم البيانات
+          setTimeout(() => {
+            userTransactionCache.delete(transactionKey);
+          }, 10 * 60 * 1000);
+          
+          showToast('✅ تمت عملية التبادل بنجاح', 'success');
+          document.getElementById('exchangeDialog').style.display = 'none';
+          currentExchangeOrderId = null;
+        }
+      } catch (error) {
+        console.error('❌ خطأ في تنفيذ التبادل:', error);
+        showToast(`❌ خطأ في تنفيذ التبادل: ${error.message}`, 'error');
+      } finally {
+        // إعادة تعيين الحالة
+        processingExchange = false;
+        confirmBtn.disabled = false;
+        confirmBtn.innerHTML = '<i class="fas fa-check"></i> تأكيد التبادل';
       }
     }
 
@@ -3745,11 +3808,21 @@
         if (!orderDoc.exists) throw new Error('طلب التبادل غير موجود');
         
         const order = orderDoc.data();
-        if (order.status !== 'active') throw new Error('طلب التبادل لم يعد نشطًا');
+        
+        // التحقق من حالة الطلب
+        if (order.status !== 'active') {
+          throw new Error(`طلب التبادل لم يعد نشطًا (الحالة: ${order.status})`);
+        }
         
         // التحقق من أن المشتري ليس هو البائع
         if (order.userId === buyerId.toString()) {
           throw new Error('لا يمكنك تبادل العملات مع نفسك');
+        }
+        
+        // التحقق من وجود معاملة مكتملة بالفعل لنفس المستخدم والطلب
+        const transactionKey = generateTransactionKey(buyerId, orderId);
+        if (completedExchanges.has(transactionKey)) {
+          throw new Error('تم تنفيذ هذه العملية مسبقاً');
         }
         
         // حساب المبالغ
@@ -3826,12 +3899,16 @@
         };
         await transactionRef.set(transactionData);
         
-        showToast('✅ تمت عملية التبادل بنجاح', 'success');
+        // إضافة المعرف إلى مجموعة المعاملات المكتملة
+        completedExchanges.add(transactionKey);
+        
+        // تحديث الكاش
+        userTransactionCache.set(transactionKey, Date.now());
+        
         return true;
       } catch (error) {
         console.error('❌ خطأ في تنفيذ التبادل:', error);
-        showToast(`❌ خطأ في تنفيذ التبادل: ${error.message}`, 'error');
-        return false;
+        throw error;
       } finally {
         hideWalletLoading();
       }
