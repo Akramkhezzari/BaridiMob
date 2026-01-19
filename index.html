@@ -760,6 +760,49 @@
       border: 1px solid var(--border-light);
     }
 
+    /* التعديل هنا: أزرار اختيار نوع الطلب بأيقونات - جعلها بنفس حجم أزرار الإجراءات */
+    .exchange-type-selector {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+      width: 100%;
+    }
+
+    .exchange-type-btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: 2px solid var(--border-light);
+      background: white;
+      color: var(--text-dark);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .exchange-type-btn:hover {
+      border-color: var(--primary);
+      transform: translateY(-2px);
+    }
+
+    .exchange-type-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0, 102, 51, 0.2);
+    }
+
+    .exchange-type-btn i {
+      font-size: 18px;
+      margin-bottom: 2px;
+    }
+
     /* نافذة حوار التبادل */
     .exchange-dialog {
       display: none;
@@ -2139,12 +2182,19 @@
           <div>رصيد الدولار المتوفر: <span id="availableUSD">0.00 $</span></div>
         </div>
 
+        <!-- التعديل هنا: تم تغيير select إلى أزرار أيقونات -->
         <div class="form-group">
           <label class="form-label">نوع الطلب</label>
-          <select class="form-select" id="exchangeType">
-            <option value="sell-dzd">بيع دينار مقابل دولار</option>
-            <option value="sell-usd">بيع دولار مقابل دينار</option>
-          </select>
+          <div class="exchange-type-selector">
+            <button type="button" class="exchange-type-btn active" data-type="sell-dzd">
+              <i class="fas fa-dinar-sign"></i>
+              <span>بيع دينار مقابل دولار</span>
+            </button>
+            <button type="button" class="exchange-type-btn" data-type="sell-usd">
+              <i class="fas fa-dollar-sign"></i>
+              <span>بيع دولار مقابل دينار</span>
+            </button>
+          </div>
         </div>
 
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -3302,6 +3352,14 @@
       document.getElementById('sellAmount').value = '';
       document.getElementById('exchangeRate').value = '';
       
+      // تعيين النوع الافتراضي
+      document.querySelectorAll('.exchange-type-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.dataset.type === 'sell-dzd') {
+          btn.classList.add('active');
+        }
+      });
+      
       updateExchangeSummary();
     }
 
@@ -3588,7 +3646,9 @@
     }
 
     function updateExchangeSummary() {
-      const type = document.getElementById('exchangeType').value;
+      // الحصول على النوع المحدد من أزرار الأيقونات
+      const activeTypeBtn = document.querySelector('.exchange-type-btn.active');
+      const type = activeTypeBtn ? activeTypeBtn.dataset.type : 'sell-dzd';
       const amount = parseFloat(document.getElementById('sellAmount').value) || 0;
       const rate = parseFloat(document.getElementById('exchangeRate').value) || 0;
       
@@ -3602,7 +3662,9 @@
     }
 
     async function createExchangeOrder() {
-      const type = document.getElementById('exchangeType').value;
+      // الحصول على النوع المحدد من أزرار الأيقونات
+      const activeTypeBtn = document.querySelector('.exchange-type-btn.active');
+      const type = activeTypeBtn ? activeTypeBtn.dataset.type : 'sell-dzd';
       const amount = parseFloat(document.getElementById('sellAmount').value);
       const rate = parseFloat(document.getElementById('exchangeRate').value);
       
@@ -4141,6 +4203,15 @@
       document.getElementById('createExchangeCancel').addEventListener('click', closeCreateExchangeModal);
       document.getElementById('createExchangeSubmit').addEventListener('click', createExchangeOrder);
       
+      // أحداث أزرار اختيار نوع الطلب (الأيقونات الجديدة)
+      document.querySelectorAll('.exchange-type-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          document.querySelectorAll('.exchange-type-btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+          updateExchangeSummary();
+        });
+      });
+      
       // أحداث نافذة حوار التبادل
       document.getElementById('exchangeDialogClose').addEventListener('click', function() {
         document.getElementById('exchangeDialog').style.display = 'none';
@@ -4153,7 +4224,6 @@
       document.getElementById('exchangeDialogConfirm').addEventListener('click', processExchange);
       
       // أحداث تحديث ملخص التبادل
-      document.getElementById('exchangeType').addEventListener('change', updateExchangeSummary);
       document.getElementById('sellAmount').addEventListener('input', updateExchangeSummary);
       document.getElementById('exchangeRate').addEventListener('input', updateExchangeSummary);
       
